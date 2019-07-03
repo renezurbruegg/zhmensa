@@ -17,11 +17,19 @@ import com.mensa.zhmensa.models.Menu;
 import java.util.List;
 
 
+/**
+ * Adapter class that holds all menu views for a Mensa.
+ * Is used inside the recycler view to display different menus.
+ */
 public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
     private List<Menu> menus;
-    private Context context;
+
+    public static MenuCardAdapter forMensa(Mensa mensa) {
+        // TODO maybe implement caching
+        return new MenuCardAdapter(mensa);
+    }
 
     public MenuCardAdapter(Mensa mensa) {
         menus = mensa.getMenus();
@@ -32,7 +40,6 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.menu_card, parent,false);
         MenuViewHolder viewHolder = new MenuViewHolder(view);
-        context = parent.getContext();
         return viewHolder;
     }
 

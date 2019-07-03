@@ -1,6 +1,11 @@
 package com.mensa.zhmensa.models;
 
+
+/**
+ * The menu object
+ */
 public class Menu {
+
     private String name;
     private String description;
     private double price;
