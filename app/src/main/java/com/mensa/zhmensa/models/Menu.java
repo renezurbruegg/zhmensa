@@ -75,4 +75,15 @@ public class Menu implements IMenu{
     public void setMeta(String meta) {
         this.meta = meta;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getName());
+        sb.append("\n");
+        sb.append(getPrices());
+        sb.append("\n");
+        sb.append(getDescription());
+        return sb.toString();
+    }
 }
