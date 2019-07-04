@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.component;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -26,7 +28,7 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
      */
-    public static void bind(MenuViewHolder viewHolder, final IMenu menu) {
+    public static void bind(MenuViewHolder viewHolder, final IMenu menu, final Context ctx) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
@@ -41,5 +43,18 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
                 favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
             }
         });
+
+        final ImageButton shareBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.share_button);
+
+        shareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(android.content.Intent.ACTION_SEND);
+                i.setType("text/plain");
+                i.putExtra(android.content.Intent.EXTRA_TEXT, menu.toString());
+                ctx.startActivity(Intent.createChooser(i, "Share"));
+            }
+        });
+
     }
 }

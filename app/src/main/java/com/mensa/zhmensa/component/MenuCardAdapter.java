@@ -26,7 +26,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
     private List<IMenu> menus;
-
+    private Context context;
     public static MenuCardAdapter forMensa(Mensa mensa) {
         // TODO maybe implement caching
         return new MenuCardAdapter(mensa);
@@ -44,6 +44,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     @NonNull
     @Override
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        context = parent.getContext();
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.menu_card, parent,false);
         MenuViewHolder viewHolder = new MenuViewHolder(view);
         return viewHolder;
@@ -52,7 +53,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MenuViewHolder holder, int position) {
        IMenu menu = menus.get(position);
-       MenuViewHolder.bind(holder, menu);
+       MenuViewHolder.bind(holder, menu, context);
     }
 
     @Override
