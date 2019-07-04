@@ -8,24 +8,12 @@
     tools:context=".MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:padding="8dp">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="#000"
-            android:textSize="18sp"
-            android:id="@+id/mensa_title"/>
         <androidx.recyclerview.widget.RecyclerView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:id="@+id/menus"
             android:scrollbars="vertical">
 
         </androidx.recyclerview.widget.RecyclerView>
 
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

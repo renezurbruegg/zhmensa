@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.component.MenuViewHolder;
+import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.Menu;
 
@@ -24,15 +25,20 @@ import java.util.List;
 public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
-    private List<Menu> menus;
+    private List<IMenu> menus;
 
     public static MenuCardAdapter forMensa(Mensa mensa) {
         // TODO maybe implement caching
         return new MenuCardAdapter(mensa);
     }
 
-    public MenuCardAdapter(Mensa mensa) {
-        menus = mensa.getMenus();
+    public MenuCardAdapter(List<IMenu> menus) {
+        this.menus = menus;
+    }
+
+
+    public MenuCardAdapter(Mensa mensa){
+        this(mensa.getMenus());
     }
 
     @NonNull
@@ -45,7 +51,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MenuViewHolder holder, int position) {
-       Menu menu = menus.get(position);
+       IMenu menu = menus.get(position);
        MenuViewHolder.bind(holder, menu);
     }
 

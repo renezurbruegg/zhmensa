@@ -4,24 +4,24 @@ package com.mensa.zhmensa.models;
 /**
  * The menu object
  */
-public class Menu {
+public class Menu implements IMenu{
 
     private String name;
     private String description;
-    private double price;
+    private String prices;
     private String allergene;
     private String meta;
 
-    public Menu(String name, String description, double price, String allergene, String meta) {
+    public Menu(String name, String description, String prices, String allergene, String meta) {
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.prices = prices;
         this.allergene = allergene;
         this.meta = meta;
     }
 
-    public Menu(String name, String description, double price, String allergene) {
-        this(name, description,price,allergene, null);
+    public Menu(String name, String description, String prices, String allergene) {
+        this(name, description, prices, allergene, null);
     }
 
     public String getName() {
@@ -40,12 +40,12 @@ public class Menu {
         this.description = description;
     }
 
-    public double getPrice() {
-        return price;
+    public String getPrices() {
+        return prices;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setPrices(String prices) {
+        this.prices = prices;
     }
 
     public String getAllergene() {

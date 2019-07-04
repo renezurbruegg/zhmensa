@@ -17,7 +17,7 @@ public abstract class Mensa {
      *
      * @return a list with all menus currently server by this mensa
      */
-    abstract public List<Menu> getMenus();
+    abstract public List<IMenu> getMenus();
 
     public String getDisplayName() {
         return displayName;

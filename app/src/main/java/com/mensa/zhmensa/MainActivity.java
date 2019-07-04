@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity
     // ------ End Navigation Drawer -----------------
 
 
-    TextView titleView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        getSupportActionBar().setTitle("Favorites");
         // Set up sidebar navigation
         expandableListView = findViewById(R.id.expandableListView);
         prepareMenuData();
@@ -76,16 +75,13 @@ public class MainActivity extends AppCompatActivity
 
         // Display test mensa on startup. Likely change to favorites
         Mensa testMensa = MensaFactory.getTestMensa();
-        MenuCardAdapter adapter = MenuCardAdapter.forMensa(testMensa);
+        MenuCardAdapter adapter = new MenuCardAdapter(MensaFactory.getFavoriteMenus());
 
         // Set up recycler view.
         recyclerView = (RecyclerView)findViewById(R.id.menus);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
-
-        // Bind title view
-        titleView = (TextView) findViewById(R.id.mensa_title);
 
     }
 
@@ -212,7 +208,8 @@ public class MainActivity extends AppCompatActivity
     private void selectFavorites(){
         Toast.makeText(this, "Favorites Selected", Toast.LENGTH_SHORT).show();
         // recyclerView.setAdapter(MenuCardAdapter.forMensa(mensa));
-        titleView.setText("Favorites");
+        getSupportActionBar().setTitle("Favorites");
+        recyclerView.setAdapter(new MenuCardAdapter(MensaFactory.getFavoriteMenus()));
     }
 
     /**
@@ -223,6 +220,6 @@ public class MainActivity extends AppCompatActivity
     private void selectMensa(Mensa mensa) {
         Toast.makeText(this, mensa.getDisplayName(), Toast.LENGTH_SHORT).show();
         recyclerView.setAdapter(MenuCardAdapter.forMensa(mensa));
-        titleView.setText(mensa.getDisplayName());
+        getSupportActionBar().setTitle(mensa.getDisplayName());
     }
 }

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Menu;
 
 /**
@@ -24,8 +25,9 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
      */
-    public static void bind(MenuViewHolder viewHolder, Menu menu) {
+    public static void bind(MenuViewHolder viewHolder, IMenu menu) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
+        ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
 
     }

@@ -2,6 +2,8 @@ package com.mensa.zhmensa.services;
 
 import com.mensa.zhmensa.filters.MensaFilter;
 import com.mensa.zhmensa.models.DummyMensa;
+import com.mensa.zhmensa.models.FavoriteMenu;
+import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.MensaCategory;
 
@@ -13,6 +15,16 @@ import java.util.List;
  * Static factory class to supply mensa instances.
  * */
 public class MensaFactory {
+
+
+    public static List<IMenu> getFavoriteMenus() {
+        List<IMenu> list = new ArrayList<>();
+        Mensa m = getTestMensa();
+        for (int i = 0; i < 5; i++) {
+            list.add(new FavoriteMenu(m.getMenus().get(0), m));
+        }
+        return list;
+    }
 
     /**
      *
