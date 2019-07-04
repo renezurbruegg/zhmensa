@@ -1,6 +1,7 @@
 package com.mensa.zhmensa.component;
 
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -25,10 +26,20 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
      */
-    public static void bind(MenuViewHolder viewHolder, IMenu menu) {
+    public static void bind(MenuViewHolder viewHolder, final IMenu menu) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
 
+        final ImageButton favBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.bookmark_button);
+        favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
+
+        favBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                menu.setFavorite(!menu.isFavorite());
+                favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
+            }
+        });
     }
 }

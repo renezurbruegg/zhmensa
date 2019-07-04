@@ -10,4 +10,7 @@ public interface IMenu {
 
     public String getAllergene();
 
+    public boolean isFavorite();
+
+    public void setFavorite(boolean isFavorite);
 }

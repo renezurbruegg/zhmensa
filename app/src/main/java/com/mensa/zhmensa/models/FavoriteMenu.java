@@ -28,4 +28,14 @@ public class FavoriteMenu implements IMenu {
     public String getAllergene() {
         return menu.getAllergene();
     }
+
+    @Override
+    public boolean isFavorite() {
+        return true;
+    }
+
+    @Override
+    public void setFavorite(boolean isFavorite) {
+        // Do nothing
+    }
 }

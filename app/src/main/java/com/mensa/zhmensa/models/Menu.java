@@ -11,6 +11,8 @@ public class Menu implements IMenu{
     private String prices;
     private String allergene;
     private String meta;
+    private boolean favorite;
+
 
     public Menu(String name, String description, String prices, String allergene, String meta) {
         this.name = name;
@@ -50,6 +52,16 @@ public class Menu implements IMenu{
 
     public String getAllergene() {
         return allergene;
+    }
+
+    @Override
+    public boolean isFavorite() {
+        return favorite;
+    }
+
+    @Override
+    public void setFavorite(boolean isFavorite) {
+        this.favorite = isFavorite;
     }
 
     public void setAllergene(String allergene) {
