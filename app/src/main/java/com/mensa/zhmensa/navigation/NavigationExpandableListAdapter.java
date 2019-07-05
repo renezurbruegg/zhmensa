@@ -63,7 +63,9 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public int getChildrenCount(int groupPosition) {
 
-        if (this.listDataChild.get(this.listDataHeader.get(groupPosition)) == null)
+        if (this.listDataChild.get(this.listDataHeader.get(groupPosition)) == null )
+            return 0;
+        if (!this.listDataHeader.get(groupPosition).hasChildren())
             return 0;
         else
             return this.listDataChild.get(this.listDataHeader.get(groupPosition))

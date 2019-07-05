@@ -1,11 +1,15 @@
 package com.mensa.zhmensa.models;
 
 
+import java.util.List;
+import java.util.Observable;
+
+
 /**
  * Mensa Category. Defines the group that can be expanded in the navigation drawer.
  * E.G. UZH, ETH ...
  */
-public class MensaCategory {
+public abstract class MensaCategory {
     /**
      * Name that is displayed inside the drawer
      */
@@ -22,4 +26,6 @@ public class MensaCategory {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
+    public abstract Observable loadMensasFromAPI();
 }

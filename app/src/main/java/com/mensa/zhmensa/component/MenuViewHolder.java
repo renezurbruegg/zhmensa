@@ -2,8 +2,10 @@ package com.mensa.zhmensa.component;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,6 +34,7 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
+        ((TextView) viewHolder.itemView.findViewById(R.id.allergene)).setText(menu.getAllergene());
 
         final ImageButton favBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.bookmark_button);
         favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
@@ -56,5 +59,15 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
+        final LinearLayout showMoreLayout = (LinearLayout) viewHolder.itemView.findViewById(R.id.showmore_layout);
+        final ImageButton showMoreBtn = (ImageButton) viewHolder.itemView.findViewById(R.id.showmore_button);
+        showMoreBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean hide = (showMoreLayout.getVisibility() == View.VISIBLE);
+                showMoreLayout.setVisibility(hide ? View.GONE : View.VISIBLE);
+                showMoreBtn.setImageResource( hide ? R.drawable.ic_keyboard_arrow_down_black_24dp : R.drawable.ic_keyboard_arrow_up_black_24dp);
+            }
+        });
     }
 }
