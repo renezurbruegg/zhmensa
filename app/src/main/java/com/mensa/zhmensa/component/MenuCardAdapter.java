@@ -25,21 +25,13 @@ import java.util.List;
 public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
-    private List<IMenu> menus;
     private Context context;
-    public static MenuCardAdapter forMensa(Mensa mensa) {
-        // TODO maybe implement caching
-        return new MenuCardAdapter(mensa);
-    }
+    private List<IMenu> menus;
 
     public MenuCardAdapter(List<IMenu> menus) {
         this.menus = menus;
     }
 
-
-    public MenuCardAdapter(Mensa mensa){
-        this(mensa.getMenus());
-    }
 
     @NonNull
     @Override

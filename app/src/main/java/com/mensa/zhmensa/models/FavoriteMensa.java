@@ -14,7 +14,7 @@ public class FavoriteMensa extends Mensa {
     }
 
     @Override
-    public List<IMenu> getMenus() {
+    public List<IMenu> getMenusForDayAndCategory(Weekday day, MenuCategory category) {
         return Arrays.<IMenu>asList(new Menu("WOK STREET", "GAENG PED\n" +
                 "with Swiss chicken or beef liver in\n" +
                 "spiced red Thai curry sauce with yellow carrots, beans, carrots, sweet Thai basil\n" +
