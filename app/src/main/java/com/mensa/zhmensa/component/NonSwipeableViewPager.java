@@ -11,6 +11,9 @@ import androidx.viewpager.widget.ViewPager;
 
 import java.lang.reflect.Field;
 
+/**
+ * Viewpager implemnetation that does change tabs on left / right swipe
+ */
 public class NonSwipeableViewPager extends ViewPager {
 
     public NonSwipeableViewPager(Context context) {

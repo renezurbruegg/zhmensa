@@ -23,9 +23,11 @@ public abstract class MensaCategory {
         return displayName;
     }
 
+    abstract Observable getMensaUpdateForDayAndMeal(Mensa.Weekday day, Mensa.MenuCategory menuCategory);
+
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    public abstract Observable loadMensasFromAPI();
+    public abstract List<MensaListObservable> loadMensasFromAPI();
 }

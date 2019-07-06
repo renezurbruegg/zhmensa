@@ -3,6 +3,7 @@ package com.mensa.zhmensa;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -46,7 +47,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, MensaManager.OnMensaLoadedListener {
 
     // Main view that contains all cards.
     //private RecyclerView recyclerView;
@@ -83,6 +84,8 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        MensaManager.addOnMensaLoadListener(this);
         navigationView.setNavigationItemSelectedListener(this);
 
         // Display test mensa on startup. Likely change to favorites
@@ -122,6 +125,21 @@ public class MainActivity extends AppCompatActivity
         reloadData();
 
      //    selectMensa(getSelectedMensa());
+    }
+
+    @Override
+    public void onNewMensaLoaded(List<Mensa> mensas) {
+        Log.d("OnNewMensaLoaded", "listener triggered");
+        for(Mensa mensa: mensas) {
+            for (NavigationMenuHeader header : headerList) {
+                if (mensa.getCategory() == header.category) {
+                    Log.d("OnNewMensaLoaded", "Found header: " + header.category.getDisplayName() + " for " + mensa.getDisplayName());
+                    childList.get(header).add(new NavigationMenuChild(mensa));
+                }
+            }
+        }
+
+        populateExpandableList();
     }
 
     public static class DummyFragment extends Fragment {
@@ -220,6 +238,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+
+
     /**
      * Loads all categories + mensa from factory and stores them in list/map
      */
@@ -232,34 +252,42 @@ public class MainActivity extends AppCompatActivity
     //        childList.put(fav, Collections.<NavigationMenuChild>emptyList());
 
         for(MensaCategory category : MensaManager.getMensaCategories()) {
-            // TODO do not hardcode
+
             final NavigationMenuHeader headItem = new NavigationMenuHeader(category, !category.getDisplayName().equals("Favorites"));
             headerList.add(headItem);
 
-            Log.e("obs","adding obs for cat" + category.getDisplayName());
-            final ArrayList<NavigationMenuChild> catChildList = new ArrayList<>();
+            Log.e("starting loading","loading mensaas for " + category.getDisplayName());
+            MensaManager.loadMensasForCategory(category);
+            childList.put(headItem, new ArrayList<NavigationMenuChild>());
 
+            //final ArrayList<NavigationMenuChild> catChildList = new ArrayList<>();
+
+           /* Log.d("obs", "added obs for cat" + String.valueOf(category));
             MensaManager.getObservableForCategory(category).addObserver(new Observer() {
                 @Override
                 public void update(Observable observable, Object e) {
 
-                    Log.e("obs","GOT notification");
-                    for(Mensa mensa : ((MensaListObservable) observable).getNewItems()) {
+
+
+                    Log.e("obs","GOT notification " + e.toString());
+                    Pair<List<Mensa>, List<Mensa>> pair = (Pair<List<Mensa>, List<Mensa>>) e;
+                    Log.d("size", pair.first.size() +" S");
+                    for(Mensa mensa : pair.first) {
                         Log.e("i", "item");
                         childList.get(headItem).add(new NavigationMenuChild(mensa));
                     }
-                    Log.e("p", "pop view");
+                    Log.e("finished", "pop view");
+                    //catChildList.addAll(pair.first);
                     populateExpandableList();
                     //catChildList.addAll(((MensaListObservable) observable).getNewItems());
                   //  Log.e("obs", ((MensaListObservable) observable).getMsg());
                     //    catChildList.add(new NavigationMenuChild(mensa));
                 }
-            });
+            }); */
 
             //for(Mensa mensa : MensaManager.getMensaListForCategory(category)) {
              //   catChildList.add(new NavigationMenuChild(mensa));
             //}
-            childList.put(headItem, catChildList);
         }
     }
 
@@ -324,6 +352,7 @@ public class MainActivity extends AppCompatActivity
         if(mensa == null)
             return;
 
+        Log.d("MENSA:", MensaManager.printMensa(mensa.getUniqueId()));
         Toast.makeText(this, mensa.getDisplayName() +" id: " + mensa.getUniqueId(), Toast.LENGTH_SHORT).show();
         getSupportActionBar().setTitle(mensa.getDisplayName());
         MensaTab tab = TabManager.getTabForMensa(mensa);

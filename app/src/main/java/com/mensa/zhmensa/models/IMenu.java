@@ -13,4 +13,6 @@ public interface IMenu {
     public boolean isFavorite();
 
     public void setFavorite(boolean isFavorite);
+
+    String getMeta();
 }

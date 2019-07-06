@@ -38,4 +38,9 @@ public class FavoriteMenu implements IMenu {
     public void setFavorite(boolean isFavorite) {
         // Do nothing
     }
+
+    @Override
+    public String getMeta() {
+        return null;
+    }
 }

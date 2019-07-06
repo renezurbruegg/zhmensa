@@ -1,24 +1,23 @@
 package com.mensa.zhmensa.models;
 
 import android.util.Log;
-import android.widget.Toast;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.HttpUtils;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import cz.msebera.android.httpclient.Header;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Observable;
-import java.util.TimeZone;
 
 
 public class EthMensaCategory extends MensaCategory {
@@ -28,6 +27,7 @@ public class EthMensaCategory extends MensaCategory {
     public EthMensaCategory(String displayName) {
         super(displayName);
     }
+
 
 
     public static List<IMenu> getMenusFromJsonArray(JSONArray array) throws JSONException{
@@ -65,14 +65,15 @@ public class EthMensaCategory extends MensaCategory {
         return menus;
     }
 
-    public static List<Mensa> convertJsonResponseToList(JSONArray array) {
+    public static List<Mensa> convertJsonResponseToList(JSONArray array, Mensa.Weekday day, Mensa.MenuCategory menuCategory) {
         List<Mensa> mensaList = new ArrayList<>();
         for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject obj = (JSONObject) array.get(i);
                 Log.d("JSON ARR:",obj.toString());
                 String name = obj.getString("mensa");
-                Mensa mensa = new Mensa(name, getMenusFromJsonArray(obj.getJSONArray("meals")));
+                Mensa mensa = new Mensa(name, name);
+                mensa.addMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(obj.getJSONArray("meals")));
                 mensaList.add(mensa);
             } catch (JSONException e) {
                 Log.e("Error", e.getMessage());
@@ -81,25 +82,20 @@ public class EthMensaCategory extends MensaCategory {
         return mensaList;
     }
 
-    public static String getCurrentDay() {
-        Date date = new Date(System.currentTimeMillis());
-
-        // Conversion
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setTimeZone(TimeZone.getTimeZone("MESZ"));
-        return sdf.format(date);
-    }
 
     @Override
-    public Observable loadMensasFromAPI() {
-        final MensaListObservable obs = new MensaListObservable();
+    MensaListObservable getMensaUpdateForDayAndMeal(final Mensa.Weekday day, final Mensa.MenuCategory menuCategory) {
+        final MensaListObservable obs = new MensaListObservable(day, menuCategory);
+        int offset = 0;
+        String mealType = menuCategory == Mensa.MenuCategory.LUNCH ? "lunch" : "dinner";
+        Log.d("Mensa api request", "Api rquest with menucat " + String.valueOf(menuCategory));
 
-        HttpUtils.getByUrl("https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/"+ getCurrentDay() +"/lunch", new RequestParams(), new JsonHttpResponseHandler() {
+        HttpUtils.getByUrl("https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/"+ Helper.getDay(day.day) +"/" + mealType, new RequestParams(), new JsonHttpResponseHandler() {
 
             public void onSuccess(int statusCode, Header[] headers, JSONArray timeline) {
+                Log.e("Got menucat", String.valueOf(menuCategory));
                 Log.d("ETH Mensa API Response", timeline.toString());
-                obs.addNewMensaList(convertJsonResponseToList(timeline));
+                obs.addNewMensaList(convertJsonResponseToList(timeline, day, menuCategory));
             }
 
             public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, String responseString, Throwable throwable) {
@@ -107,5 +103,16 @@ public class EthMensaCategory extends MensaCategory {
             }
         });
         return obs;
+    }
+
+    @Override
+    public List<MensaListObservable> loadMensasFromAPI() {
+        List<MensaListObservable> list = new ArrayList<>();
+        for (Mensa.Weekday day: Mensa.Weekday.values()) {
+            for (Mensa.MenuCategory cat: Mensa.MenuCategory.values()) {
+                list.add(getMensaUpdateForDayAndMeal(day, cat));
+            }
+        }
+        return list;
     }
 }

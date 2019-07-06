@@ -3,27 +3,24 @@ package com.mensa.zhmensa.models;
 import android.util.Log;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.mensa.zhmensa.services.HttpUtils;
 
-import org.json.JSONArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Observable;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -34,14 +31,16 @@ import cz.msebera.android.httpclient.Header;
 public class UzhMensaCategory extends MensaCategory {
 
     private static final MensaApiRoute[] ROUTES = {
-            new MensaApiRoute(147, "UZH untere Mensa A"),
-            new MensaApiRoute(148, "UZH obere Mensa B"),
-            new MensaApiRoute(150, "UZH Lichthof"),
-            new MensaApiRoute(180, "UZH Irchel"),
-            new MensaApiRoute(146, "ZH Tierspital"),
-            new MensaApiRoute(151, "UZH Zentrum Für Zahnmedizin"),
-            new MensaApiRoute(143, "ZH Platte"),
-            new MensaApiRoute(346, "UZH Rämi 59 (vegan)"),
+            new MensaApiRoute(147, "UZH untere Mensa A", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(148, "UZH obere Mensa B", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(150, "UZH Lichthof", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(180, "UZH Irchel",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(146, "ZH Tierspital",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(151, "UZH Zentrum Für Zahnmedizin",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(143, "ZH Platte",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(346, "UZH Rämi 59 (vegan)",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(149, "UZH untere Mensa A",Mensa.MenuCategory.DINNER),
+            new MensaApiRoute(256, "UZH Irchel",Mensa.MenuCategory.DINNER),
     };
     /**
      *         "UZH untere Mensa A": 147,
@@ -52,21 +51,33 @@ public class UzhMensaCategory extends MensaCategory {
      *         "UZH Zentrum Für Zahnmedizin": 151,
      *         "UZH Platte": 143,
      *          "UZH Rämi 59 (vegan)": 346,
+     *            "UZH untere Mensa A (abend)": 149,
+     * "UZH Irchel (abend)": 256
      */
-    private final List<Integer> servedRoutes = new ArrayList<>();
+    private final Set<Integer> servedRoutes = new HashSet<>();
 
     public UzhMensaCategory(String displayName) {
         super(displayName);
     }
 
+    @Override
+    Observable getMensaUpdateForDayAndMeal(Mensa.Weekday day, Mensa.MenuCategory menuCategory) {
+        return null;
+    }
+
 
     @Override
-    public Observable loadMensasFromAPI() {
-        final MensaListObservable obs = new MensaListObservable();
-        for(MensaApiRoute route : ROUTES) {
-            HttpUtils.getByUrl("http://zfv.ch/de/menus/rssMenuPlan?menuId="+route.id +"&&dayOfWeek=1", new RequestParams(), new XMLResponseHandler(obs, route));
+    public List<MensaListObservable> loadMensasFromAPI() {
+        List<MensaListObservable> obsList = new ArrayList<>();
+        for(Mensa.Weekday day: Mensa.Weekday.values()) {
+
+            for (MensaApiRoute route : ROUTES) {
+                final MensaListObservable obs = new MensaListObservable(day, route.mealType);
+                obsList.add(obs);
+                HttpUtils.getByUrl("http://zfv.ch/de/menus/rssMenuPlan?menuId=" + route.id + "&&dayOfWeek=" + (day.day + 1), new RequestParams(), new XMLResponseHandler(obs, route));
+            }
         }
-        return obs;
+        return obsList;
     }
 
 
@@ -74,8 +85,10 @@ public class UzhMensaCategory extends MensaCategory {
     private static class MensaApiRoute {
         public int id;
         public String name;
+        public Mensa.MenuCategory mealType;
 
-        public MensaApiRoute(int id, String name) {
+        public MensaApiRoute(int id, String name, Mensa.MenuCategory mealType) {
+            this.mealType = mealType;
             this.id = id;
             this.name = name;
         }
@@ -91,17 +104,20 @@ public class UzhMensaCategory extends MensaCategory {
 
         @Override
         public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
-            Log.e("reposne", new String(responseBody));
+       //     Log.e("reposne", new String(responseBody));
             try {
-                Mensa m = parseXML(responseBody);
-                m.setDisplayName(apiRoute.name);
-                observable.pushSilently(m);
+                Mensa m = parseXML(apiRoute.name, responseBody, observable.day, observable.mealType);
+               // Log.e("pushing:", m.toString());
+                observable.addNewMensa(m);
                 servedRoutes.add(apiRoute.id);
+                Log.d("size:" , "served " + servedRoutes.size());
+                Log.d("size:" , "routes " + ROUTES.length);
+
                 // TODO lock
-                if(servedRoutes.size() == ROUTES.length) {
-                    observable.notifyAllObservers();
-                    servedRoutes.clear();
-                }
+            //    if(servedRoutes.size() == ROUTES.length) {
+                //    observable.notifyAllObservers();
+               //     servedRoutes.clear();
+              //  }
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -115,12 +131,19 @@ public class UzhMensaCategory extends MensaCategory {
 
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+            Log.e("fail", error.getMessage());
+            Log.e("id:", apiRoute.id+ "");
+            servedRoutes.add(apiRoute.id);
+            if(servedRoutes.size() == ROUTES.length) {
+                observable.notifyAllObservers();
+                servedRoutes.clear();
+            }
 
         }
 
 
 
-        private Mensa parseXML(byte[] xmlFile) throws  IOException, SAXException, ParserConfigurationException {
+        private Mensa parseXML(String name, byte[] xmlFile, Mensa.Weekday day, Mensa.MenuCategory mealType) throws  IOException, SAXException, ParserConfigurationException {
 
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -132,19 +155,21 @@ public class UzhMensaCategory extends MensaCategory {
 
             Node divNode = null;
 
-            Log.d("sum node", summaryNode.getNodeName());
+//            Log.d("sum node", summaryNode.getNodeName());
 
 
-            Log.d("length", summaryNode.getChildNodes().getLength() + "");
+  //          Log.d("length", summaryNode.getChildNodes().getLength() + "");
             for (int i = 0; i < summaryNode.getChildNodes().getLength(); i++) {
                 Node n = summaryNode.getChildNodes().item(i);
                 if(n.getNodeName().equals("div")) {
-                    return new Mensa("", getMensaFromDivNode(n));
+                    Mensa m = new Mensa(name, name);
+                    m.addMenuForDayAndCategory(day,mealType,getMensaFromDivNode(n));
+                    return m;
                 }
-                Log.d("n", n.getNodeName());
+         //       Log.d("n", n.getNodeName());
             }
 
-            return new Mensa("Error no div node found");
+            return new Mensa("Error no div node found", "ERROR");
 
         }
 
@@ -185,9 +210,9 @@ public class UzhMensaCategory extends MensaCategory {
                 if(n.getNodeName().equals("p")) {
 
                     currentMenu.setDescription(domAsString(n));
-                    Log.d("string, " , currentMenu.toString());
+         //           Log.d("string, " , currentMenu.toString());
                 }
-                Log.d("n", n.getNodeName());
+           //     Log.d("n", n.getNodeName());
             }
             return menuList;
         }

@@ -10,7 +10,7 @@ import java.util.List;
 public class FavoriteMensa extends Mensa {
 
     public FavoriteMensa(String displayName) {
-        super(displayName);
+        super(displayName, displayName);
     }
 
     @Override

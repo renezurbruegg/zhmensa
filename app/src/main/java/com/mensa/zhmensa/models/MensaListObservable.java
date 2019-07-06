@@ -22,6 +22,14 @@ public class MensaListObservable extends Observable implements Serializable {
         return mensaList;
     }
 
+    public final Mensa.Weekday day;
+    public final Mensa.MenuCategory mealType;
+
+    public MensaListObservable(Mensa.Weekday day, Mensa.MenuCategory mealType) {
+        this.day = day;
+        this.mealType = mealType;
+    }
+
 
     public void clear() {
         mensaList.clear();

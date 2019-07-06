@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Menu;
+import com.mensa.zhmensa.services.Helper;
 
 /**
  * Simple implementation for a Mensa Menu view.
@@ -37,6 +38,18 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
         ((TextView) viewHolder.itemView.findViewById(R.id.allergene)).setText(menu.getAllergene());
 
         final ImageButton favBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.bookmark_button);
+
+
+        final ImageButton shareBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.share_button);
+        final LinearLayout showMoreLayout = (LinearLayout) viewHolder.itemView.findViewById(R.id.showmore_layout);
+        final ImageButton showMoreBtn = (ImageButton) viewHolder.itemView.findViewById(R.id.showmore_button);
+
+        if(Helper.firstNonNull(menu.getMeta(),"").equals("dummy")) {
+            shareBtn.setVisibility(View.GONE);
+            showMoreBtn.setVisibility(View.GONE);
+            favBtn.setVisibility(View.GONE);
+            return;
+        }
         favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
 
         favBtn.setOnClickListener(new View.OnClickListener() {
@@ -47,7 +60,6 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
-        final ImageButton shareBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.share_button);
 
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,8 +71,6 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
-        final LinearLayout showMoreLayout = (LinearLayout) viewHolder.itemView.findViewById(R.id.showmore_layout);
-        final ImageButton showMoreBtn = (ImageButton) viewHolder.itemView.findViewById(R.id.showmore_button);
         showMoreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -69,5 +79,7 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
                 showMoreBtn.setImageResource( hide ? R.drawable.ic_keyboard_arrow_down_black_24dp : R.drawable.ic_keyboard_arrow_up_black_24dp);
             }
         });
+
+
     }
 }

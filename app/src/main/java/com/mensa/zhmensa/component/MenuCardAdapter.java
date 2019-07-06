@@ -4,17 +4,16 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.component.MenuViewHolder;
 import com.mensa.zhmensa.models.IMenu;
-import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.Menu;
+import com.mensa.zhmensa.services.Helper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,7 +28,15 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     private List<IMenu> menus;
 
     public MenuCardAdapter(List<IMenu> menus) {
-        this.menus = menus;
+        this.menus = new ArrayList<>();
+
+        if(menus != null) {
+            this.menus.addAll(menus);
+        }
+
+        if(this.menus.isEmpty()) {
+            this.menus.add(new Menu("","","Momentan kein Menü verfügbar","", "dummy"));
+        }
     }
 
 
