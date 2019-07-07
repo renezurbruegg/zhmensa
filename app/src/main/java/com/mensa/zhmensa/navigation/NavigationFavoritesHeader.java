@@ -4,7 +4,7 @@ public class NavigationFavoritesHeader extends NavigationMenuHeader{
 
 
     public NavigationFavoritesHeader() {
-        super(null);
+        super(null, false);
     }
 
     public String getDisplayName() {

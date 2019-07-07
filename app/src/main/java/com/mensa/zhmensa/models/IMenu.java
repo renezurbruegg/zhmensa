@@ -8,6 +8,8 @@ public interface IMenu {
 
     public String getPrices();
 
+    public String getId();
+
     public String getAllergene();
 
     public boolean isFavorite();

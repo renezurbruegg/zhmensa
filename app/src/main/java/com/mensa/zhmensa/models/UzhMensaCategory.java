@@ -15,10 +15,8 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.NavigableSet;
 import java.util.Observable;
 import java.util.Set;
 
@@ -163,7 +161,7 @@ public class UzhMensaCategory extends MensaCategory {
                 Node n = summaryNode.getChildNodes().item(i);
                 if(n.getNodeName().equals("div")) {
                     Mensa m = new Mensa(name, name);
-                    m.addMenuForDayAndCategory(day,mealType,getMensaFromDivNode(n));
+                    m.setMenuForDayAndCategory(day,mealType,getMensaFromDivNode(n));
                     return m;
                 }
          //       Log.d("n", n.getNodeName());
@@ -198,12 +196,14 @@ public class UzhMensaCategory extends MensaCategory {
                 Node n = divNode.getChildNodes().item(i);
 
                 if(n.getNodeName().equals("h3")) {
-                    currentMenu = new Menu(null,null,null,null);
+                    currentMenu = new Menu(null, null,null,null,null);
                     menuList.add(currentMenu);
 
                     // found new Meal
                     NodeList children = n.getChildNodes();
-                    currentMenu.setName(trimString(children.item(0).getNodeValue()));
+                    String name = trimString(children.item(0).getNodeValue());
+                    currentMenu.setName(name);
+                    currentMenu.setId(name);
                     currentMenu.setPrices(trimString(children.item(1).getFirstChild().getNodeValue()));
                 }
 

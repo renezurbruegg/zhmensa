@@ -3,12 +3,14 @@ package com.mensa.zhmensa.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Observable;
 
+/**
+ * Observable used to communicate when new Mensas are loaded from the REST API
+ */
 public class MensaListObservable extends Observable implements Serializable {
 
     private List<Mensa> mensaList = new ArrayList<>();

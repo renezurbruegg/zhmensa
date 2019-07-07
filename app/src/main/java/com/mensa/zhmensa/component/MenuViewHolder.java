@@ -15,6 +15,7 @@ import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Menu;
 import com.mensa.zhmensa.services.Helper;
+import com.mensa.zhmensa.services.MensaManager;
 
 /**
  * Simple implementation for a Mensa Menu view.
@@ -55,7 +56,8 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
         favBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                menu.setFavorite(!menu.isFavorite());
+                MensaManager.toggleMenuFav(menu);
+                //menu.setFavorite(!menu.isFavorite());
                 favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
             }
         });

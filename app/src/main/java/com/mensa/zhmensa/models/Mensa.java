@@ -2,14 +2,18 @@ package com.mensa.zhmensa.models;
 
 import android.util.Log;
 
+import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Abstract class that defines a mensa.
@@ -20,7 +24,7 @@ public class Mensa {
     private String displayName;
     private List<IMenu> menus = new ArrayList<>();
     private final String mensaId;
-    private final Map<Weekday, Map<MenuCategory, List<IMenu>>> meals;
+    final Map<Weekday, Map<MenuCategory, List<IMenu>>> meals;
     private MensaCategory category;
 
     public Mensa(String displayName, String id) {
@@ -39,13 +43,33 @@ public class Mensa {
         return this.category;
     }
 
-    public void addMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
+    public void setMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
         Log.d("Adding menus " + getDisplayName(), "cat " + String.valueOf(category) + " menus: " + menus) ;
 
         Map<MenuCategory,List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, List<IMenu>>());
 
         //Map<MenuCategory,List<IMenu>> map = new HashMap<>();
         map.put(category, menus);
+
+        meals.put(weekday,map);
+    }
+    public void addMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
+        Log.d("Adding menus " + getDisplayName(), "cat " + String.valueOf(category) + " menus: " + menus) ;
+
+        Map<MenuCategory,List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, List<IMenu>>());
+
+        //Map<MenuCategory,List<IMenu>> map = new HashMap<>();
+
+        List<IMenu> storedMenus = Helper.firstNonNull(map.get(category), new ArrayList<IMenu>());
+
+        Set<IMenu> set = new HashSet<>(storedMenus);
+
+        for (IMenu menu : menus) {
+            set.add(menu);
+        }
+
+        storedMenus.addAll(set);
+        map.put(category, new ArrayList<IMenu>(set));
 
         meals.put(weekday,map);
     }
@@ -86,6 +110,17 @@ public class Mensa {
     public String toString() {
         String ret =  "Name: " + getDisplayName() + " Id: " + getUniqueId() + " \n ";
         return ret + meals.toString();
+    }
+
+    public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category, MenuFilter filter) {
+        Map<MenuCategory, List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), Collections.<MenuCategory, List<IMenu>>emptyMap());
+
+        List<IMenu> returnList = new ArrayList<>();
+        for (IMenu menu: Helper.<List<IMenu>>firstNonNull(map.get(category), Collections.<IMenu>emptyList())) {
+            if(filter.apply(menu))
+                returnList.add(menu);
+        }
+        return returnList;
     }
 
 }

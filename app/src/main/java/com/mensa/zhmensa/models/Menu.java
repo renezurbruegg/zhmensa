@@ -1,6 +1,8 @@
 package com.mensa.zhmensa.models;
 
 
+import com.mensa.zhmensa.services.MensaManager;
+
 /**
  * The menu object
  */
@@ -12,20 +14,26 @@ public class Menu implements IMenu{
     private String allergene;
     private String meta;
     private boolean favorite;
+    private String id;
 
 
-    public Menu(String name, String description, String prices, String allergene, String meta) {
+
+    public Menu(String id, String name, String description, String prices, String allergene, String meta) {
         this.name = name;
         this.description = description;
         this.prices = prices;
         this.allergene = allergene;
         this.meta = meta;
+        this.id = id;
     }
 
-    public Menu(String name, String description, String prices, String allergene) {
-        this(name, description, prices, allergene, null);
+    public Menu(String id, String name, String description, String prices, String allergene) {
+        this(id, name, description, prices, allergene, null);
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
     public String getName() {
         return name;
     }
@@ -46,6 +54,11 @@ public class Menu implements IMenu{
         return prices;
     }
 
+    @Override
+    public String getId() {
+        return id;
+    }
+
     public void setPrices(String prices) {
         this.prices = prices;
     }
@@ -56,7 +69,7 @@ public class Menu implements IMenu{
 
     @Override
     public boolean isFavorite() {
-        return favorite;
+       return MensaManager.isFavorite(getId());
     }
 
     @Override

@@ -7,9 +7,6 @@ import com.loopj.android.http.RequestParams;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.HttpUtils;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,7 +14,6 @@ import cz.msebera.android.httpclient.Header;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Observable;
 
 
 public class EthMensaCategory extends MensaCategory {
@@ -30,9 +26,11 @@ public class EthMensaCategory extends MensaCategory {
 
 
 
-    public static List<IMenu> getMenusFromJsonArray(JSONArray array) throws JSONException{
+    public static List<IMenu> getMenusFromJsonArray(String mensa, JSONArray array) throws JSONException{
         List<IMenu> menus = new ArrayList<>();
+
         for (int i = 0; i < array.length(); i++) {
+
             JSONObject meal = array.getJSONObject(i);
             JSONArray description = meal.getJSONArray("description");
             String descriptionStr = "";
@@ -55,6 +53,7 @@ public class EthMensaCategory extends MensaCategory {
 
             menus.add(
                     new Menu(
+                            "uni:" + mensa + "pos:" + i ,
                         meal.getString("label"),
                         descriptionStr,
                         pricesStr,
@@ -73,7 +72,7 @@ public class EthMensaCategory extends MensaCategory {
                 Log.d("JSON ARR:",obj.toString());
                 String name = obj.getString("mensa");
                 Mensa mensa = new Mensa(name, name);
-                mensa.addMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(obj.getJSONArray("meals")));
+                mensa.setMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(name, obj.getJSONArray("meals")));
                 mensaList.add(mensa);
             } catch (JSONException e) {
                 Log.e("Error", e.getMessage());

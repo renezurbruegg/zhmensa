@@ -22,6 +22,7 @@ import com.mensa.zhmensa.models.MensaListObservable;
 import com.mensa.zhmensa.navigation.NavigationExpandableListAdapter;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.navigation.NavigationFavoritesHeader;
 import com.mensa.zhmensa.navigation.NavigationMenuChild;
 import com.mensa.zhmensa.navigation.NavigationMenuHeader;
 import com.mensa.zhmensa.services.MensaManager;
@@ -40,6 +41,8 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +79,10 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("start");
+
+
+        MensaManager.setActivityContext(getApplicationContext());
+
         // Set up sidebar navigation
         expandableListView = findViewById(R.id.expandableListView);
 
@@ -140,6 +148,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         populateExpandableList();
+        selectMensa(getSelectedMensa());
     }
 
     public static class DummyFragment extends Fragment {
@@ -244,12 +253,12 @@ public class MainActivity extends AppCompatActivity
      * Loads all categories + mensa from factory and stores them in list/map
      */
     private void prepareMenuData() {
-    //    NavigationFavoritesHeader fav = new NavigationFavoritesHeader();
+        NavigationFavoritesHeader fav = new NavigationFavoritesHeader();
         headerList.clear();
         childList.clear();
 
-    //       headerList.add(fav);
-    //        childList.put(fav, Collections.<NavigationMenuChild>emptyList());
+        headerList.add(fav);
+        childList.put(fav, Arrays.asList(new NavigationMenuChild(MensaManager.getFavoritesMensa())));
 
         for(MensaCategory category : MensaManager.getMensaCategories()) {
 
@@ -260,34 +269,6 @@ public class MainActivity extends AppCompatActivity
             MensaManager.loadMensasForCategory(category);
             childList.put(headItem, new ArrayList<NavigationMenuChild>());
 
-            //final ArrayList<NavigationMenuChild> catChildList = new ArrayList<>();
-
-           /* Log.d("obs", "added obs for cat" + String.valueOf(category));
-            MensaManager.getObservableForCategory(category).addObserver(new Observer() {
-                @Override
-                public void update(Observable observable, Object e) {
-
-
-
-                    Log.e("obs","GOT notification " + e.toString());
-                    Pair<List<Mensa>, List<Mensa>> pair = (Pair<List<Mensa>, List<Mensa>>) e;
-                    Log.d("size", pair.first.size() +" S");
-                    for(Mensa mensa : pair.first) {
-                        Log.e("i", "item");
-                        childList.get(headItem).add(new NavigationMenuChild(mensa));
-                    }
-                    Log.e("finished", "pop view");
-                    //catChildList.addAll(pair.first);
-                    populateExpandableList();
-                    //catChildList.addAll(((MensaListObservable) observable).getNewItems());
-                  //  Log.e("obs", ((MensaListObservable) observable).getMsg());
-                    //    catChildList.add(new NavigationMenuChild(mensa));
-                }
-            }); */
-
-            //for(Mensa mensa : MensaManager.getMensaListForCategory(category)) {
-             //   catChildList.add(new NavigationMenuChild(mensa));
-            //}
         }
     }
 
@@ -349,8 +330,10 @@ public class MainActivity extends AppCompatActivity
      * @param mensa the mensa which should be shown
      */
     private void selectMensa(Mensa mensa) {
-        if(mensa == null)
+        if(mensa == null) {
+            Log.d("selectMensa", "Mensa was null");
             return;
+        }
 
         Log.d("MENSA:", MensaManager.printMensa(mensa.getUniqueId()));
         Toast.makeText(this, mensa.getDisplayName() +" id: " + mensa.getUniqueId(), Toast.LENGTH_SHORT).show();
