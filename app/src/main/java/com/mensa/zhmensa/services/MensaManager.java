@@ -14,6 +14,7 @@ import com.mensa.zhmensa.models.MensaCategory;
 import com.mensa.zhmensa.models.MensaListObservable;
 import com.mensa.zhmensa.models.UzhMensaCategory;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -59,19 +60,26 @@ public class MensaManager {
 
     private static final List<OnMensaLoadedListener> listeners = new ArrayList<>();
 
-    private static final MensaCategory[] categories = {new EthMensaCategory("ETH"), new UzhMensaCategory("UZH")};
-
-    private static final MensaCategory DummyZentrumCategory = new MensaCategory("ETH-Zentrum") {
-
+    private static final MensaCategory dummyHonggCat = new EthMensaCategory("ETH-Höngg", Arrays.<String>asList("FUSION coffee", "FUSION meal", "Rice Up!", "food market - green day", "food market - grill bbQ", "food market - plaza pasta")) {
         @Override
         public List<MensaListObservable> loadMensasFromAPI() {
             return Collections.emptyList();
         }
     };
 
-    // ---------- Internal functions ---------------
-    private MensaCategory getCategoryForMensa(Mensa Mensa, MensaCategory defaultCategory) {
+    private static final MensaCategory[] categories = {new EthMensaCategory("ETH"), new UzhMensaCategory("UZH"), dummyHonggCat};
 
+
+
+    // ---------- Internal functions ---------------
+
+
+    private static MensaCategory getCategoryForMensa(Mensa mensa, MensaCategory defaultCategory) {
+        for (MensaCategory cat: categories ) {
+            if(cat.containsMensa(mensa)) {
+                return cat;
+            }
+        }
 
         return defaultCategory;
     }
@@ -173,8 +181,7 @@ public class MensaManager {
      */
     public static List<MensaCategory> getMensaCategories() {
         return Arrays.<MensaCategory>asList(
-                new EthMensaCategory("ETH"),
-                new UzhMensaCategory("UZH")
+              categories
         );
     }
 
@@ -248,7 +255,7 @@ public class MensaManager {
 
                     // Add every new mensa to the mensa mapping. This will notify all listeners and they will appear in the sidebar.
                     for (Mensa mensa : observable.getNewItems()) {
-                        mensa.setMensaCategory(category);
+                        mensa.setMensaCategory(getCategoryForMensa(mensa, category));
 
                         // New loaded Menus
                         List<IMenu> newMenus = mensa.getMenusForDayAndCategory(observable.day, observable.mealType);

@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
@@ -14,13 +16,19 @@ import java.util.Observable;
  * E.G. UZH, ETH ...
  */
 public abstract class MensaCategory {
+    private final List<String> knownMensas;
     /**
      * Name that is displayed inside the drawer
      */
     private String displayName;
 
     public MensaCategory(String displayName) {
-        this.displayName = displayName;
+        this(displayName, Collections.<String>emptyList());
+    }
+
+    public MensaCategory(String catName, List<String> mensaIds) {
+        this.displayName = catName;
+        knownMensas = new ArrayList<>(mensaIds);
     }
 
     public String getDisplayName() {
@@ -36,4 +44,9 @@ public abstract class MensaCategory {
         return null;
     }
     public abstract List<MensaListObservable> loadMensasFromAPI();
+
+    public boolean containsMensa(Mensa mensa) {
+        // Default. Needs to be overriden by subclass
+        return knownMensas.contains(mensa.getUniqueId());
+    }
 }

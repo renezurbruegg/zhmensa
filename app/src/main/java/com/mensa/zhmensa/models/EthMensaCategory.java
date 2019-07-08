@@ -25,6 +25,10 @@ public class EthMensaCategory extends MensaCategory {
         super(displayName);
     }
 
+    public EthMensaCategory(String displayName, List<String> knownMensaIds) {
+        super(displayName, knownMensaIds);
+    }
+
 
 
     public static List<IMenu> getMenusFromJsonArray(String mensa, Mensa.MenuCategory mealType, JSONArray array) throws JSONException{

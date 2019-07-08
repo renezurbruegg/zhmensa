@@ -334,6 +334,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("selectMensa", "Mensa was null");
             return;
         }
+        Log.d("mkiisx", mensa.getUniqueId());
 
         Log.d("MENSA:", MensaManager.printMensa(mensa.getUniqueId()));
         Toast.makeText(this, mensa.getDisplayName() +" id: " + mensa.getUniqueId(), Toast.LENGTH_SHORT).show();

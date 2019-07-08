@@ -30,6 +30,11 @@ public class Mensa implements Comparable<Mensa> {
     public Mensa(String displayName, String id) {
         meals = new HashMap<>();
         this.mensaId = id;
+
+        // Convert first character to upper case
+        if(displayName.length() > 0 && Character.isLowerCase(displayName.charAt(0))) {
+            displayName = Character.toUpperCase(displayName.charAt(0)) + displayName.substring(1);
+        }
         this.displayName = displayName;
         this.menus.addAll(menus);
 
@@ -96,7 +101,7 @@ public class Mensa implements Comparable<Mensa> {
 
     @Override
     public int compareTo(Mensa m) {
-        return Helper.firstNonNull(getDisplayName(), "").compareTo(m.getDisplayName());
+        return Helper.firstNonNull(getDisplayName(), "").toLowerCase().compareTo(Helper.firstNonNull((m.getDisplayName()),"").toLowerCase());
     }
 
 

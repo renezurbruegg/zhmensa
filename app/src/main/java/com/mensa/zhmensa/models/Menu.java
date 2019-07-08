@@ -103,6 +103,6 @@ public class Menu implements IMenu{
 
     @Override
     public int compareTo(IMenu otherMenu) {
-        return Helper.firstNonNull(getName(), "").compareTo(Helper.firstNonNull(otherMenu.getName(),""));
+        return Helper.firstNonNull(getName(), "").toLowerCase().compareTo(Helper.firstNonNull(otherMenu.getName(),"").toLowerCase());
     }
 }
