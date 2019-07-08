@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.models;
 
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 
 import java.util.Arrays;
@@ -18,9 +19,10 @@ public class FavoriteMensa extends Mensa {
     public FavoriteMensa(String displayName) {
         super(displayName, displayName);
         setMensaCategory(new MensaCategory("Favorites") {
+
             @Override
-            Observable getMensaUpdateForDayAndMeal(Weekday day, MenuCategory menuCategory) {
-                return new Observable();
+            public Integer getCategoryIconId() {
+                return R.drawable.ic_favorite_black_24dp;
             }
 
             @Override
@@ -60,5 +62,9 @@ public class FavoriteMensa extends Mensa {
                 }*/
             }
         }
+    }
+
+    public void addMenu(String mensaName, Weekday day, MenuCategory mealType, IMenu menu) {
+        addMenuForDayAndCategory(day, mealType, Arrays.<IMenu>asList(new FavoriteMenu(mensaName, menu)));
     }
 }

@@ -19,7 +19,7 @@ import java.util.Set;
  * Abstract class that defines a mensa.
  * The display Name will be displayed as title and in the navigation drawer.
  */
-public class Mensa {
+public class Mensa implements Comparable<Mensa> {
 
     private String displayName;
     private List<IMenu> menus = new ArrayList<>();
@@ -92,6 +92,11 @@ public class Mensa {
 
     public String getUniqueId() {
         return mensaId;
+    }
+
+    @Override
+    public int compareTo(Mensa m) {
+        return Helper.firstNonNull(getDisplayName(), "").compareTo(m.getDisplayName());
     }
 
 

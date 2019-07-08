@@ -1,6 +1,7 @@
 package com.mensa.zhmensa.models;
 
 
+import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
 /**
@@ -64,7 +65,7 @@ public class Menu implements IMenu{
     }
 
     public String getAllergene() {
-        return allergene;
+        return "Allergene: " + allergene;
     }
 
     @Override
@@ -98,5 +99,10 @@ public class Menu implements IMenu{
         sb.append("\n");
         sb.append(getDescription());
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo(IMenu otherMenu) {
+        return Helper.firstNonNull(getName(), "").compareTo(Helper.firstNonNull(otherMenu.getName(),""));
     }
 }

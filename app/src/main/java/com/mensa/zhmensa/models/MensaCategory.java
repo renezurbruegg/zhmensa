@@ -1,6 +1,10 @@
 package com.mensa.zhmensa.models;
 
 
+import android.graphics.drawable.Drawable;
+
+import androidx.annotation.Nullable;
+
 import java.util.List;
 import java.util.Observable;
 
@@ -23,11 +27,13 @@ public abstract class MensaCategory {
         return displayName;
     }
 
-    abstract Observable getMensaUpdateForDayAndMeal(Mensa.Weekday day, Mensa.MenuCategory menuCategory);
-
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
+    @Nullable
+    public Integer getCategoryIconId() {
+        return null;
+    }
     public abstract List<MensaListObservable> loadMensasFromAPI();
 }

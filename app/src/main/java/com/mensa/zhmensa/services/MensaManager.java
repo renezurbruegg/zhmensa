@@ -17,6 +17,7 @@ import com.mensa.zhmensa.models.UzhMensaCategory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,9 +59,22 @@ public class MensaManager {
 
     private static final List<OnMensaLoadedListener> listeners = new ArrayList<>();
 
+    private static final MensaCategory[] categories = {new EthMensaCategory("ETH"), new UzhMensaCategory("UZH")};
 
+    private static final MensaCategory DummyZentrumCategory = new MensaCategory("ETH-Zentrum") {
+
+        @Override
+        public List<MensaListObservable> loadMensasFromAPI() {
+            return Collections.emptyList();
+        }
+    };
 
     // ---------- Internal functions ---------------
+    private MensaCategory getCategoryForMensa(Mensa Mensa, MensaCategory defaultCategory) {
+
+
+        return defaultCategory;
+    }
 
 
     /**
@@ -247,7 +261,7 @@ public class MensaManager {
                         for (IMenu menu : newMenus) {
                             if (favoriteIds.contains(menu.getId())) {
                                 Log.e("MensaManager-Observable", "Menu: " + menu.getName() + " will be added to the favorite Mensa");
-                                favoriteMensa.addMenuForDayAndCategory(observable.day, observable.mealType, Arrays.asList(menu));
+                                favoriteMensa.addMenu(mensa.getDisplayName(),observable.day, observable.mealType, menu);
                             }
                         }
                     }

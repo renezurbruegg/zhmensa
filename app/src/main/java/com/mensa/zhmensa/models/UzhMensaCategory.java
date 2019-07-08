@@ -2,8 +2,12 @@ package com.mensa.zhmensa.models;
 
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.HttpUtils;
 
 import org.w3c.dom.Document;
@@ -56,11 +60,6 @@ public class UzhMensaCategory extends MensaCategory {
 
     public UzhMensaCategory(String displayName) {
         super(displayName);
-    }
-
-    @Override
-    Observable getMensaUpdateForDayAndMeal(Mensa.Weekday day, Mensa.MenuCategory menuCategory) {
-        return null;
     }
 
 
@@ -161,7 +160,7 @@ public class UzhMensaCategory extends MensaCategory {
                 Node n = summaryNode.getChildNodes().item(i);
                 if(n.getNodeName().equals("div")) {
                     Mensa m = new Mensa(name, name);
-                    m.setMenuForDayAndCategory(day,mealType,getMensaFromDivNode(n));
+                    m.setMenuForDayAndCategory(day,mealType,getMensaFromDivNode(name, mealType, n));
                     return m;
                 }
          //       Log.d("n", n.getNodeName());
@@ -188,7 +187,7 @@ public class UzhMensaCategory extends MensaCategory {
             return stringToTrim.trim();
         }
 
-        private List<IMenu> getMensaFromDivNode(Node divNode) {
+        private List<IMenu> getMensaFromDivNode(String mensaName, Mensa.MenuCategory mealType, Node divNode) {
             List<IMenu> menuList = new ArrayList<>();
 
             Menu currentMenu = null;
@@ -203,7 +202,7 @@ public class UzhMensaCategory extends MensaCategory {
                     NodeList children = n.getChildNodes();
                     String name = trimString(children.item(0).getNodeValue());
                     currentMenu.setName(name);
-                    currentMenu.setId(name);
+                    currentMenu.setId(Helper.getIdForMenu(mensaName, name, menuList.size() , mealType));
                     currentMenu.setPrices(trimString(children.item(1).getFirstChild().getNodeValue()));
                 }
 
@@ -217,5 +216,12 @@ public class UzhMensaCategory extends MensaCategory {
             return menuList;
         }
 
+    }
+
+
+    @Nullable
+    @Override
+    public Integer getCategoryIconId() {
+        return R.drawable.ic_uni;
     }
 }

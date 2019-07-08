@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.HttpUtils;
 
@@ -26,7 +27,7 @@ public class EthMensaCategory extends MensaCategory {
 
 
 
-    public static List<IMenu> getMenusFromJsonArray(String mensa, JSONArray array) throws JSONException{
+    public static List<IMenu> getMenusFromJsonArray(String mensa, Mensa.MenuCategory mealType, JSONArray array) throws JSONException{
         List<IMenu> menus = new ArrayList<>();
 
         for (int i = 0; i < array.length(); i++) {
@@ -42,7 +43,7 @@ public class EthMensaCategory extends MensaCategory {
             String pricesStr = prices.getString("student") + " / " + prices.getString("staff") + " / " + prices.getString("extern");
 
             JSONArray allergene = meal.getJSONArray("allergens");
-            String allergeneStr = "Allergene: ";
+            String allergeneStr = "";
             for (int j = 0; j < allergene.length(); j++) {
                 //String[] split = allergene.getString(j).split(":");
                 //allergeneStr += split[split.length - 1];
@@ -52,12 +53,11 @@ public class EthMensaCategory extends MensaCategory {
             }
 
             menus.add(
-                    new Menu(
-                            "uni:" + mensa + "pos:" + i ,
-                        meal.getString("label"),
-                        descriptionStr,
-                        pricesStr,
-                        allergeneStr
+                    new Menu(Helper.getIdForMenu(mensa, meal.getString("label"), i, mealType),
+                            meal.getString("label"),
+                            descriptionStr,
+                            pricesStr,
+                            allergeneStr
                     )
             );
         }
@@ -72,7 +72,7 @@ public class EthMensaCategory extends MensaCategory {
                 Log.d("JSON ARR:",obj.toString());
                 String name = obj.getString("mensa");
                 Mensa mensa = new Mensa(name, name);
-                mensa.setMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(name, obj.getJSONArray("meals")));
+                mensa.setMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(name, menuCategory,  obj.getJSONArray("meals")));
                 mensaList.add(mensa);
             } catch (JSONException e) {
                 Log.e("Error", e.getMessage());
@@ -82,7 +82,7 @@ public class EthMensaCategory extends MensaCategory {
     }
 
 
-    @Override
+
     MensaListObservable getMensaUpdateForDayAndMeal(final Mensa.Weekday day, final Mensa.MenuCategory menuCategory) {
         final MensaListObservable obs = new MensaListObservable(day, menuCategory);
         int offset = 0;
@@ -113,5 +113,12 @@ public class EthMensaCategory extends MensaCategory {
             }
         }
         return list;
+    }
+
+
+
+    @Override
+    public Integer getCategoryIconId() {
+        return R.drawable.ic_eth_2;
     }
 }

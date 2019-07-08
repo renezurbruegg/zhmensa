@@ -7,13 +7,16 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.SortedList;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Menu;
 import com.mensa.zhmensa.services.Helper;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -25,17 +28,17 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
     private Context context;
-    private List<IMenu> menus;
+    private SortedList<IMenu> menus;
 
     public MenuCardAdapter(List<IMenu> menus) {
-        this.menus = new ArrayList<>();
+        this.menus = new SortedList<IMenu>(IMenu.class, new ComparableSortedListAdapterCallback(this));
 
         if(menus != null) {
             this.menus.addAll(menus);
         }
 
-        if(this.menus.isEmpty()) {
-            this.menus.add(new Menu("","","Momentan kein Menü verfügbar","", "dummy"));
+        if(this.menus.size() == 0) {
+            this.menus.add(new Menu("","","Momentan kein Menü verfügbar","", "","dummy"));
         }
     }
 
@@ -59,4 +62,6 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     public int getItemCount() {
         return menus.size();
     }
+
+
 }

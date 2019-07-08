@@ -2,7 +2,7 @@ package com.mensa.zhmensa.navigation;
 
 import com.mensa.zhmensa.models.Mensa;
 
-public class NavigationMenuChild {
+public class NavigationMenuChild implements  Comparable<NavigationMenuChild>{
 
 
     public Mensa mensa;
@@ -13,5 +13,10 @@ public class NavigationMenuChild {
 
     public String getDisplayName() {
         return mensa.getDisplayName();
+    }
+
+    @Override
+    public int compareTo(NavigationMenuChild navigationMenuChild) {
+        return mensa.compareTo(navigationMenuChild.mensa);
     }
 }

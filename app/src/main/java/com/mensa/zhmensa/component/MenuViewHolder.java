@@ -46,11 +46,20 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
         final ImageButton showMoreBtn = (ImageButton) viewHolder.itemView.findViewById(R.id.showmore_button);
 
         if(Helper.firstNonNull(menu.getMeta(),"").equals("dummy")) {
-            shareBtn.setVisibility(View.GONE);
-            showMoreBtn.setVisibility(View.GONE);
-            favBtn.setVisibility(View.GONE);
+
+            ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setGravity(View.TEXT_ALIGNMENT_CENTER);
+            shareBtn.setVisibility(View.INVISIBLE);
+            showMoreBtn.setVisibility(View.INVISIBLE);
+            favBtn.setVisibility(View.INVISIBLE);
             return;
         }
+
+
+        if(Helper.firstNonNull(menu.getAllergene(),"").isEmpty()) {
+            shareBtn.setVisibility(View.INVISIBLE);
+        }
+
+
         favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
 
         favBtn.setOnClickListener(new View.OnClickListener() {

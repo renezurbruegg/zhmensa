@@ -11,6 +11,7 @@
         android:gravity="center_vertical"
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
         android:paddingRight="?attr/listPreferredItemPaddingRight"
+        android:drawablePadding="10dp"
         android:textColor="#1f2124"
         android:textSize="16sp" />
 </LinearLayout>

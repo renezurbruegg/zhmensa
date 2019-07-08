@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity
         TabAdapter mAdapter = new TabAdapter(getSupportFragmentManager());
 
         for(Mensa.Weekday day : Mensa.Weekday.values()) {
-            mAdapter.addFragment(tab.getFragmentForWeekday(day), String.valueOf(day));
+            mAdapter.addFragment(tab.getFragmentForWeekday(day), getNameForDay(day));
         }
         viewPager.setAdapter(mAdapter);
        // currentMensaTab = TabManager.getTabForMensa(mensa);
@@ -352,4 +352,20 @@ public class MainActivity extends AppCompatActivity
         mAdapter.addFragment(currentMensaTab.getFragagmentList().get(1),"Dinner");
         viewPager.setAdapter(mAdapter);
     */}
+
+    private String getNameForDay(Mensa.Weekday day) {
+        switch (day) {
+            case MONDAY:
+                return "Mo";
+            case TUESDAY:
+                return "Di";
+            case WEDNESDAY:
+                return "Mi";
+            case THURSDAY:
+                return "Do";
+            case FRIDAY:
+                return "Fr";
+        }
+        return String.valueOf(day);
+    }
 }

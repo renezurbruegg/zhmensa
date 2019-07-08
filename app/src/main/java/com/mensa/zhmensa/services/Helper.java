@@ -1,11 +1,14 @@
 package com.mensa.zhmensa.services;
 
+import com.mensa.zhmensa.models.Mensa;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 public class Helper {
 
+    private static final String[] UNIQUE_MENU_MENSA = {"Tannebar"};
     public static <T> T firstNonNull(T... objects){
         for (T obj: objects) {
             if(obj != null)
@@ -14,6 +17,23 @@ public class Helper {
         return null;
     }
 
+    public static String getIdForMenu(String mensaName, String menuName, int loadIndex, Mensa.MenuCategory mealType) {
+        if(isUniqueMenueName(mensaName, menuName)) {
+            return "'uni:" + mensaName + "' pos: " + loadIndex + " mealtype:" + mealType;
+        }
+        return "mensa:" + mensaName + ",Menu:" + menuName;
+    }
+
+
+
+    private static boolean isUniqueMenueName(String mensaName, String menuName) {
+       for (String mensa : UNIQUE_MENU_MENSA) {
+           if(mensa.equals(mensaName)) {
+               return true;
+           }
+       }
+       return false;
+    };
 
 
     public static DateTime getStartOfWeek() {

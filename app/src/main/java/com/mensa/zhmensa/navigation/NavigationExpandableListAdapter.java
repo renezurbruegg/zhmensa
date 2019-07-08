@@ -1,18 +1,24 @@
 package com.mensa.zhmensa.navigation;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
+
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.navigation.NavigationFavoritesHeader;
 import com.mensa.zhmensa.navigation.NavigationMenuChild;
 import com.mensa.zhmensa.navigation.NavigationMenuHeader;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +32,11 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         this.context = context;
         this.listDataHeader = listDataHeader;
         this.listDataChild = listChildData;
-    }
+        for (List<NavigationMenuChild> children: listDataChild.values()) {
+            Collections.sort(children);
+        }
 
+    }
 
 
     @Override
@@ -99,11 +108,11 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if(header instanceof NavigationFavoritesHeader) {
-                convertView = inflater.inflate(R.layout.list_group_favorite, null);
-            } else {
-                convertView = inflater.inflate(R.layout.list_group_header, null);
-            }
+             convertView = inflater.inflate(R.layout.list_group_header, null);
+
+             if(header.category != null && header.category.getCategoryIconId() != null) {
+                 ((TextView) convertView.findViewById(R.id.lblListHeader)).setCompoundDrawablesRelativeWithIntrinsicBounds(header.category.getCategoryIconId(),0,0,0);
+             }
         }
 
         TextView lblListHeader = convertView.findViewById(R.id.lblListHeader);

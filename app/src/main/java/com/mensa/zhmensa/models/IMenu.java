@@ -1,6 +1,6 @@
 package com.mensa.zhmensa.models;
 
-public interface IMenu {
+public interface IMenu extends Comparable<IMenu> {
 
     public String getName();
 
