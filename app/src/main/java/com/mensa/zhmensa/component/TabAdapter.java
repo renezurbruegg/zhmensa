@@ -14,6 +14,7 @@ import java.util.List;
 public class TabAdapter extends FragmentStatePagerAdapter {
     private final List<Fragment> mFragmentList = new ArrayList<>();
     private final List<String> mFragmentTitleList = new ArrayList<>();
+
     public TabAdapter(FragmentManager fm) {
         super(fm);
     }
@@ -22,15 +23,31 @@ public class TabAdapter extends FragmentStatePagerAdapter {
     public Fragment getItem(int position) {
         return mFragmentList.get(position);
     }
+
     public void addFragment(Fragment fragment, String title) {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
     }
+
+    @Override
+    public void notifyDataSetChanged() {
+        super.notifyDataSetChanged();
+        for (Fragment frag : mFragmentList) {
+            if(frag instanceof MensaTab.MensaWeekdayTabFragment) {
+                ((MensaTab.MensaWeekdayTabFragment) frag).notifyDatasetChanged();
+            }
+            else if(frag instanceof MensaTab.MenuTabContentFragment) {
+                ((MensaTab.MenuTabContentFragment) frag).notifyDatasetChanged();
+            }
+        }
+    }
+
     @Nullable
     @Override
     public CharSequence getPageTitle(int position) {
         return mFragmentTitleList.get(position);
     }
+
     @Override
     public int
     getCount() {

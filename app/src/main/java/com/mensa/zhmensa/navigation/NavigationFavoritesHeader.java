@@ -24,7 +24,7 @@ public class NavigationFavoritesHeader extends NavigationMenuHeader{
             public Integer getCategoryIconId() {
                 return R.drawable.ic_favorite_black_24dp;
             }
-        }, false);
+        }, false, -1);
     }
 
     public String getDisplayName() {

@@ -4,10 +4,8 @@ import android.util.Log;
 
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.services.Helper;
-import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +22,7 @@ public class Mensa implements Comparable<Mensa> {
     private String displayName;
     private List<IMenu> menus = new ArrayList<>();
     private final String mensaId;
-    final Map<Weekday, Map<MenuCategory, List<IMenu>>> meals;
+    final Map<Weekday, Map<MenuCategory, Set<IMenu>>> meals;
     private MensaCategory category;
 
     public Mensa(String displayName, String id) {
@@ -51,21 +49,21 @@ public class Mensa implements Comparable<Mensa> {
     public void setMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
         Log.d("Adding menus " + getDisplayName(), "cat " + String.valueOf(category) + " menus: " + menus) ;
 
-        Map<MenuCategory,List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, List<IMenu>>());
+        Map<MenuCategory,Set<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, Set<IMenu>>());
 
         //Map<MenuCategory,List<IMenu>> map = new HashMap<>();
-        map.put(category, menus);
+        map.put(category, new HashSet<IMenu>(menus));
 
         meals.put(weekday,map);
     }
     public void addMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
         Log.d("Adding menus " + getDisplayName(), "cat " + String.valueOf(category) + " menus: " + menus) ;
 
-        Map<MenuCategory,List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, List<IMenu>>());
+        Map<MenuCategory,Set<IMenu>> map = Helper.firstNonNull(meals.get(weekday), new HashMap<MenuCategory, Set<IMenu>>());
 
         //Map<MenuCategory,List<IMenu>> map = new HashMap<>();
 
-        List<IMenu> storedMenus = Helper.firstNonNull(map.get(category), new ArrayList<IMenu>());
+        Set<IMenu> storedMenus = Helper.firstNonNull(map.get(category), new HashSet<IMenu>());
 
         Set<IMenu> set = new HashSet<>(storedMenus);
 
@@ -74,7 +72,7 @@ public class Mensa implements Comparable<Mensa> {
         }
 
         storedMenus.addAll(set);
-        map.put(category, new ArrayList<IMenu>(set));
+        map.put(category, set);
 
         meals.put(weekday,map);
     }
@@ -83,8 +81,11 @@ public class Mensa implements Comparable<Mensa> {
      * @return a list with all menus currently server by this mensa. Returns never null, but empty list if nothing is found
      */
     public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category) {
-        Map<MenuCategory, List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), Collections.<MenuCategory, List<IMenu>>emptyMap());
-        return Helper.<List<IMenu>>firstNonNull(map.get(category), Collections.<IMenu>emptyList());
+        Map<MenuCategory, Set<IMenu>> map = Helper.firstNonNull(meals.get(weekday), Collections.<MenuCategory, Set<IMenu>>emptyMap());
+        List<IMenu> returnList = new ArrayList<>();
+        returnList.addAll(Helper.firstNonNull(map.get(category), Collections.<IMenu>emptyList()));
+        Collections.sort(returnList);
+        return returnList;
     }
 
     public String getDisplayName() {
@@ -123,10 +124,10 @@ public class Mensa implements Comparable<Mensa> {
     }
 
     public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category, MenuFilter filter) {
-        Map<MenuCategory, List<IMenu>> map = Helper.firstNonNull(meals.get(weekday), Collections.<MenuCategory, List<IMenu>>emptyMap());
+        Map<MenuCategory, Set<IMenu>> map = Helper.firstNonNull(meals.get(weekday), Collections.<MenuCategory, Set<IMenu>>emptyMap());
 
         List<IMenu> returnList = new ArrayList<>();
-        for (IMenu menu: Helper.<List<IMenu>>firstNonNull(map.get(category), Collections.<IMenu>emptyList())) {
+        for (IMenu menu: Helper.<Set<IMenu>>firstNonNull(map.get(category), Collections.<IMenu>emptySet())) {
             if(filter.apply(menu))
                 returnList.add(menu);
         }

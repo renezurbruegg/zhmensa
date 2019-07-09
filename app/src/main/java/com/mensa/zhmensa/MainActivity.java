@@ -3,7 +3,6 @@ package com.mensa.zhmensa;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 
@@ -15,10 +14,9 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
+import com.mensa.zhmensa.component.MensaOverviewFragment;
 import com.mensa.zhmensa.component.MensaTab;
 import com.mensa.zhmensa.component.TabAdapter;
-import com.mensa.zhmensa.models.MensaListObservable;
 import com.mensa.zhmensa.navigation.NavigationExpandableListAdapter;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.MensaCategory;
@@ -26,35 +24,34 @@ import com.mensa.zhmensa.navigation.NavigationFavoritesHeader;
 import com.mensa.zhmensa.navigation.NavigationMenuChild;
 import com.mensa.zhmensa.navigation.NavigationMenuHeader;
 import com.mensa.zhmensa.services.MensaManager;
-import com.mensa.zhmensa.services.TabManager;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.view.Menu;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.TreeMap;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, MensaManager.OnMensaLoadedListener {
 
     // Main view that contains all cards.
     //private RecyclerView recyclerView;
-    TabLayout tabLayout;
+    //TabLayout tabLayout;
     int selectedMensaNr = 0;
     int selectedGroupNr = 0;
     ViewPager viewPager;
@@ -62,11 +59,14 @@ public class MainActivity extends AppCompatActivity
     private MensaTab currentMensaTab;
     private TabAdapter adapter;
 
+    private ViewPagerAdapter viewPagerAdapter;
+
+    private int mensaCount = 0;
     // -------- Navigation Drawer -------------
     NavigationExpandableListAdapter expandableListAdapter;
     ExpandableListView expandableListView;
     List<NavigationMenuHeader> headerList = new ArrayList<>();
-    Map<NavigationMenuHeader, List<NavigationMenuChild>> childList = new HashMap<>();
+    Map<NavigationMenuHeader, List<NavigationMenuChild>> childList = new TreeMap<>();
     // ------ End Navigation Drawer -----------------
 
 
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         // MenuCardAdapter adapter = new MenuCardAdapter(MensaManager.getFavoriteMenus());
 
         // Set up recycler view.
-        tabLayout = findViewById(R.id.main_tablayout);
+        //tabLayout = findViewById(R.id.main_tablayout);
         //tabLayout.add
         /*
         recyclerView = (RecyclerView)findViewById(R.id.menus);
@@ -115,9 +115,12 @@ public class MainActivity extends AppCompatActivity
         //adapter.addFragment(new Tab2Fragment(), "Tab 2");
         //adapter.addFragment(new Tab3Fragment(), "Tab 3"); -->
         //viewPager.setAdapter(adapter);
-        viewPager = findViewById(R.id.main_viewpager);
-        MensaTab tab = TabManager.getTabForMensa(MensaManager.getTestMensa());
+        viewPager = findViewById(R.id.OverviewViewPager);
+
+      /*  MensaTab tab = TabManager.getTabForMensa(MensaManager.getTestMensa());
+
         Log.d("adding", "adding fragments");
+
         for(Mensa.Weekday day : Mensa.Weekday.values()) {
             adapter.addFragment(tab.getFragmentForWeekday(day), String.valueOf(day));
         }
@@ -127,11 +130,12 @@ public class MainActivity extends AppCompatActivity
         //adapter.addFragment(TabManager.getTabForMensa(MensaManager.getTestMensa()).getFragagmentList().get(0), "Lunch");
         //adapter.addFragment(TabManager.getTabForMensa(MensaManager.getTestMensa()).getFragagmentList().get(0), "Dinner");
        // adapter.addFragment(new DummyFragment(), "t");
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
+       */
+       // tabLayout.setupWithViewPager(viewPager);
 
         reloadData();
-
+        viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(viewPagerAdapter);
      //    selectMensa(getSelectedMensa());
     }
 
@@ -139,10 +143,13 @@ public class MainActivity extends AppCompatActivity
     public void onNewMensaLoaded(List<Mensa> mensas) {
         Log.d("OnNewMensaLoaded", "listener triggered");
         for(Mensa mensa: mensas) {
+            Log.d("OnNewMensaLoaded", "Mensa: " + mensa.getDisplayName() +" cat: " + (mensa.getCategory() == null ? "null" : mensa.getCategory().getDisplayName()) + " size hrader: " + headerList.size());
             for (NavigationMenuHeader header : headerList) {
-                if (mensa.getCategory() == header.category) {
+                Log.d("header:", header.toString());
+                if (mensa.getCategory() != null && header.hasChildren() && mensa.getCategory().equals(header.category)) {
                     Log.d("OnNewMensaLoaded", "Found header: " + header.category.getDisplayName() + " for " + mensa.getDisplayName());
                     childList.get(header).add(new NavigationMenuChild(mensa));
+                    mensaCount++;
                 }
             }
         }
@@ -151,13 +158,14 @@ public class MainActivity extends AppCompatActivity
         selectMensa(getSelectedMensa());
     }
 
-    public static class DummyFragment extends Fragment {
-        @Nullable
-        @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment, container, false);
-        }
+    @Override
+    public void onMensaUpdated(Mensa mensa) {
+        viewPagerAdapter.notifyFragmentForIdChanged(mensa.getUniqueId());
+        /*if(getSelectedMensa().getUniqueId().equals(mensa.getUniqueId())) {
+            selectMensa(getSelectedMensa());
+        }*/
     }
+
 
     private Mensa getSelectedMensa() {
         NavigationMenuHeader header = headerList.get(selectedGroupNr);
@@ -167,26 +175,10 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
+
     public void reloadData() {
         prepareMenuData();
         populateExpandableList();
-        /*
-        TabLayout.Tab tab = new TabLayout.Tab();
-        TabLayout.Tab tab1 = tab.setCustomView(new MensaTab(null, null));
-        tabLayout.addTab(new TabLayout.Tab());
-        */
-        //tabLayout.addV
-
-      //  tabLayout.removeAllTabs();
-        /*
-        if(getSelectedMensa() != null) {
-            currentMensaTab = TabManager.getTabForMensa(getSelectedMensa());
-            replaceTabFragment(currentMensaTab.getFragagmentList().get(0));
-        }
-*/
-
-        //recyclerView.setAdapter(MenuCardAdapter.forMensa(getSelectedMensa()));
-
     }
 
     @Override
@@ -224,30 +216,15 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-       // Currently not needed since we have a custom navigation with custom listener
-       /* int id = item.getItemId();
-
-        if (id == R.id.nav_home) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_tools) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-
-        DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);*/
-        return true;
+        return false;
     }
 
-
-
+    @Override
+    protected void onDestroy() {
+        Log.d("MainActivity.onDest", "Destroying activity. Saving Mensa list to shared preferences");
+        MensaManager.storeAllMensasToCache();
+        super.onDestroy();
+    }
 
     /**
      * Loads all categories + mensa from factory and stores them in list/map
@@ -260,15 +237,18 @@ public class MainActivity extends AppCompatActivity
         headerList.add(fav);
         childList.put(fav, Arrays.asList(new NavigationMenuChild(MensaManager.getFavoritesMensa())));
 
+        int pos = 0;
         for(MensaCategory category : MensaManager.getMensaCategories()) {
 
-            final NavigationMenuHeader headItem = new NavigationMenuHeader(category, !category.getDisplayName().equals("Favorites"));
+            final NavigationMenuHeader headItem = new NavigationMenuHeader(category, !category.getDisplayName().equals("Favorites"), pos++);
             headerList.add(headItem);
 
             Log.e("starting loading","loading mensaas for " + category.getDisplayName());
-            MensaManager.loadMensasForCategory(category);
             childList.put(headItem, new ArrayList<NavigationMenuChild>());
+        }
 
+        for(MensaCategory category : MensaManager.getMensaCategories()) {
+            MensaManager.loadMensasForCategory(category);
         }
     }
 
@@ -312,18 +292,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-
-    /**
-     * Not implemented yet. Gets called when favorite tab from sidebar is selected
-     * TODO
-     */
-   /* private void selectFavorites(){
-        Toast.makeText(this, "Favorites Selected", Toast.LENGTH_SHORT).show();
-        // recyclerView.setAdapter(MenuCardAdapter.forMensa(mensa));
-        getSupportActionBar().setTitle("Favorites");
-        recyclerView.setAdapter(new MenuCardAdapter(MensaManager.getFavoriteMenus()));
-    }
-*/
     /**
      * Selects a given mensa and displays its menus inside the cards.
      * Gets called when a mensa from the sidebar is selected
@@ -334,39 +302,95 @@ public class MainActivity extends AppCompatActivity
             Log.d("selectMensa", "Mensa was null");
             return;
         }
-        Log.d("mkiisx", mensa.getUniqueId());
 
-        Log.d("MENSA:", MensaManager.printMensa(mensa.getUniqueId()));
-        Toast.makeText(this, mensa.getDisplayName() +" id: " + mensa.getUniqueId(), Toast.LENGTH_SHORT).show();
+        Log.d("Select Mensa: ", "Mensa: " + mensa.getDisplayName());
+
         getSupportActionBar().setTitle(mensa.getDisplayName());
-        MensaTab tab = TabManager.getTabForMensa(mensa);
-        Log.d("adding", "adding fragments");
-        TabAdapter mAdapter = new TabAdapter(getSupportFragmentManager());
-
-        for(Mensa.Weekday day : Mensa.Weekday.values()) {
-            mAdapter.addFragment(tab.getFragmentForWeekday(day), getNameForDay(day));
+        int pos = getMensaPosForId(mensa.getUniqueId());
+        if(pos == -1) {
+            Log.e("MainActivity.select", "got invalid mensa id: " + mensa.getUniqueId());
+            return;
         }
-        viewPager.setAdapter(mAdapter);
-       // currentMensaTab = TabManager.getTabForMensa(mensa);
-      /*  TabAdapter mAdapter = new TabAdapter(getSupportFragmentManager());
-        mAdapter.addFragment(currentMensaTab.getFragagmentList().get(0),"Lunch");
-        mAdapter.addFragment(currentMensaTab.getFragagmentList().get(1),"Dinner");
-        viewPager.setAdapter(mAdapter);
-    */}
 
-    private String getNameForDay(Mensa.Weekday day) {
-        switch (day) {
-            case MONDAY:
-                return "Mo";
-            case TUESDAY:
-                return "Di";
-            case WEDNESDAY:
-                return "Mi";
-            case THURSDAY:
-                return "Do";
-            case FRIDAY:
-                return "Fr";
-        }
-        return String.valueOf(day);
+        viewPager.setCurrentItem(pos);
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Mensa mensa = MensaManager.getMensaForId(getMensaIdForPosition(position));
+                String title = mensa.getDisplayName();
+                getSupportActionBar().setTitle(title);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
+
+
+    private String getMensaIdForPosition(int position) {
+        for(List<NavigationMenuChild> child: childList.values()) {
+            if(child.size() <= position) {
+                position -= child.size();
+            } else {
+                return child.get(position).mensa.getUniqueId();
+            }
+        }
+        return null;
+    }
+
+    private int getMensaPosForId(String mensaId) {
+        int pos = 0;
+        for(List<NavigationMenuChild> children: childList.values()) {
+            for (NavigationMenuChild child: children) {
+                if(mensaId.equals(child.mensa.getUniqueId())){
+                    return pos;
+                }
+                pos ++;
+            }
+        }
+        return -1;
+    }
+
+    private class ViewPagerAdapter extends FragmentStatePagerAdapter {
+        private final Map<Integer, MensaOverviewFragment> positionToFragment = new HashMap<>();
+
+        public ViewPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+
+            Log.d("ViewPagerAdapte.getitem", "get item called. pos: " + position);
+            if(positionToFragment.get(position) == null){
+                positionToFragment.put(position, MensaOverviewFragment.newInstance(getMensaIdForPosition(position)));
+            }
+
+            // Retrun cached fragment
+            return positionToFragment.get(position);
+        }
+
+        public void notifyFragmentForIdChanged(String mensaId) {
+            // Do stuff
+            for(MensaOverviewFragment frag: positionToFragment.values()){
+                if(frag.getMensaId().equals(mensaId)){
+                    frag.notifyDatasetChanged();
+                }
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return mensaCount;
+        }
+    }
+
+
 }

@@ -2,7 +2,7 @@ package com.mensa.zhmensa.filters;
 
 import com.mensa.zhmensa.models.IMenu;
 
-public class MenuIdFilter implements  MenuFilter {
+public class MenuIdFilter implements MenuFilter {
 
     private final String menuId;
 

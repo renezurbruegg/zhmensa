@@ -14,7 +14,6 @@ import com.mensa.zhmensa.models.MensaCategory;
 import com.mensa.zhmensa.models.MensaListObservable;
 import com.mensa.zhmensa.models.UzhMensaCategory;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,16 +21,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
 /**
- * Static factory class to supply mensa instances.
+ * Static Helper class that Manages all mensa objects.
  */
 public class MensaManager {
 
+    /**
+     * Context used to get shared Preferences
+     */
     private static Context activityContext;
 
     /**
@@ -74,6 +77,111 @@ public class MensaManager {
     // ---------- Internal functions ---------------
 
 
+    private static void addNewMensaItem(List<Mensa> mensas) {
+        for (Mensa mensa : mensas) {
+            if(!put(mensa)) {
+                Log.e("MensaManager.addNew(..)", "current mensa allready stored in map. ID: " + mensa.getUniqueId());
+            }
+        }
+    }
+
+
+
+    /**
+     * Adds a new mensa for a given category, given day and given mealtype.
+     *
+     * @param mensas Mensa items to store
+     * @param category MenuCategory
+     * @param day
+     * @param mealType
+     */
+    private static void addNewMensaItem(List<Mensa> mensas, MensaCategory category, Mensa.Weekday day, Mensa.MenuCategory mealType) {
+
+        for (Mensa mensa : mensas) {
+            mensa.setMensaCategory(getCategoryForMensa(mensa, category));
+
+            // New loaded Menus
+            List<IMenu> newMenus = mensa.getMenusForDayAndCategory(day, mealType);
+            if (!put(mensa)) {
+                // If Mensa was already stored, add the new menu to the one mensa that is allready stored.
+                Helper.firstNonNull(IdToMensaMapping.get(mensa.getUniqueId()), new Mensa("Dummy","Dummy")).setMenuForDayAndCategory(day, mealType, newMenus);
+            }
+
+            // Check if any item is a favorite Menu. If yes, add it to the favorite Mensa-
+            for (IMenu menu : newMenus) {
+                if (favoriteIds.contains(menu.getId())) {
+                    Log.e("MensaManager-Observable", "Menu: " + menu.getName() + " will be added to the favorite Mensa");
+                    favoriteMensa.addMenu(mensa.getDisplayName(),day, mealType, menu);
+                }
+            }
+        }
+    }
+
+
+    public static void storeAllMensasToCache() {
+            Map<MensaCategory, List<Mensa>> mensaMap = new HashMap<>();
+            Log.d("Iterating over mensa", "Size: " + getAllMensasAsCollection().size());
+            for(Mensa mensa : getAllMensasAsCollection()) {
+                List<Mensa> storedList = Helper.firstNonNull(mensaMap.get(mensa.getCategory()), new ArrayList<Mensa>());
+                storedList.add(mensa);
+
+                Log.d("Adding", mensa.getDisplayName() + " for cat " + mensa.getCategory().getDisplayName());
+                mensaMap.put(mensa.getCategory(), storedList);
+            }
+
+            for(MensaCategory cat : mensaMap.keySet()) {
+                storeMensasForCategory(cat, mensaMap.get(cat));
+            }
+    }
+
+    private static void storeMensasForCategory(MensaCategory category, List<Mensa> mensas) {
+        Set<String> mensaJson = new HashSet<>();
+
+        for (Mensa mensa : mensas) {
+            mensaJson.add(Helper.convertMensaToJsonString(mensa));
+        }
+
+        Log.d("MensaManager.storeMensa", "Storing:" + mensaJson);
+        activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+            .edit()
+            .putStringSet(category.getDisplayName(), mensaJson)
+            .apply();
+
+    }
+    //private static void
+    private static void loadCachedMensaForCategory(MensaCategory category) {
+        Log.d("MensaManager.loadCache", "Loading cached Mensas for category: " + category.getDisplayName());
+        Set<String> mensaJsons = activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                                                        .getStringSet(category.getDisplayName(), new HashSet<String>());
+        for (String mensaJson : mensaJsons) {
+            Mensa mensa = Helper.getMensaFromJsonString(mensaJson);
+            Log.d("MensaManager.loadCache", "Found Mensa: " + mensa.getDisplayName());
+
+            if(!put(mensa)) {
+                Log.e("MensaManager-lcmfc", "Tried to store mensa " + mensa.getDisplayName() + " but mensa was allready known");
+            }
+
+            for(Mensa.Weekday day : Mensa.Weekday.values()){
+                for(Mensa.MenuCategory cat: Mensa.MenuCategory.values()){
+                    for (IMenu menu : mensa.getMenusForDayAndCategory(day, cat)) {
+                        if (favoriteIds.contains(menu.getId())) {
+                            Log.e("MensaManager-loadCache", "Menu: " + menu.getName() + " will be added to the favorite Mensa");
+                            favoriteMensa.addMenu(mensa.getDisplayName(),day, cat, menu);
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+
+    /**
+     * Returns the category for a given mensa. if no matching one is found, the given default category is returned
+     * @param mensa
+     * @param defaultCategory
+     * @return
+     */
     private static MensaCategory getCategoryForMensa(Mensa mensa, MensaCategory defaultCategory) {
         for (MensaCategory cat: categories ) {
             if(cat.containsMensa(mensa)) {
@@ -120,18 +228,24 @@ public class MensaManager {
      * @return true if mensa was added succesfully
      */
     private static boolean put(Mensa mensa) {
-        if (IdToMensaMapping.get(mensa.getUniqueId()) != null) {
-            return false;
-        }
-        IdToMensaMapping.put(mensa.getUniqueId(), mensa);
+        if (IdToMensaMapping.get(mensa.getUniqueId()) == null) {
 
-        // New mensa was inserted
-        Log.d("MensaManager", "New mensa added: " + mensa.getDisplayName() + " triggering listener");
-        for (OnMensaLoadedListener listener : listeners) {
-            listener.onNewMensaLoaded(Arrays.asList(mensa));
+            IdToMensaMapping.put(mensa.getUniqueId(), mensa);
+
+            // New mensa was inserted
+            Log.d("MensaManager", "New mensa added: " + mensa.getDisplayName() + " triggering listener");
+            for (OnMensaLoadedListener listener : listeners) {
+                listener.onNewMensaLoaded(Arrays.asList(mensa));
+            }
+
+            return true;
+        } else {
+            for (OnMensaLoadedListener listener : listeners) {
+                listener.onMensaUpdated(mensa);
+            }
         }
 
-        return true;
+        return false;
     }
 
 
@@ -246,6 +360,9 @@ public class MensaManager {
      * @param category The category which mensas shoudl be loaded.
      */
     public static void loadMensasForCategory(final MensaCategory category) {
+
+        loadCachedMensaForCategory(category);
+
         for (final MensaListObservable observable : category.loadMensasFromAPI()) {
             observable.addObserver(new Observer() {
                 // If new Mensas were loaded.
@@ -254,28 +371,12 @@ public class MensaManager {
                     Log.e("MensaManager-Observable", "Got Updates for loadMensaFromAPI()");
 
                     // Add every new mensa to the mensa mapping. This will notify all listeners and they will appear in the sidebar.
-                    for (Mensa mensa : observable.getNewItems()) {
-                        mensa.setMensaCategory(getCategoryForMensa(mensa, category));
-
-                        // New loaded Menus
-                        List<IMenu> newMenus = mensa.getMenusForDayAndCategory(observable.day, observable.mealType);
-                        if (!put(mensa)) {
-                            // If Mensa was already stored, add the new menu to the one mensa that is allready stored.
-                            Helper.firstNonNull(IdToMensaMapping.get(mensa.getUniqueId()), new Mensa("Dummy","Dummy")).setMenuForDayAndCategory(observable.day, observable.mealType, newMenus);
-                        }
-
-                        // Check if any item is a favorite Menu. If yes, add it to the favorite Mensa-
-                        for (IMenu menu : newMenus) {
-                            if (favoriteIds.contains(menu.getId())) {
-                                Log.e("MensaManager-Observable", "Menu: " + menu.getName() + " will be added to the favorite Mensa");
-                                favoriteMensa.addMenu(mensa.getDisplayName(),observable.day, observable.mealType, menu);
-                            }
-                        }
-                    }
+                    addNewMensaItem(observable.getNewItems(), category, observable.day, observable.mealType);
                 }
             });
         }
     }
+
 
     /**
      * Adds the favorite Mensa to the MensaIdMapping and returns it.
@@ -284,6 +385,10 @@ public class MensaManager {
     public static Mensa getFavoritesMensa() {
         put(favoriteMensa);
         return favoriteMensa;
+    }
+
+    public static Mensa getMensaForId(String mensaId) {
+        return IdToMensaMapping.get(mensaId);
     }
 
 
@@ -298,5 +403,7 @@ public class MensaManager {
          * @param mensa List containing all new loaded mensas
          */
         void onNewMensaLoaded(List<Mensa> mensa);
+
+        void onMensaUpdated(Mensa mensa);
     }
 }

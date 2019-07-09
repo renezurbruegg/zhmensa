@@ -1,9 +1,7 @@
 package com.mensa.zhmensa.component;
 
 import android.content.Context;
-
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
@@ -15,31 +13,52 @@ import java.lang.reflect.Field;
 /**
  * Viewpager implemnetation that does change tabs on left / right swipe
  */
-public class NonSwipeableViewPager extends ViewPager {
+public class InterceptAllVerticalSwipesViewPager extends ViewPager {
 
-    public NonSwipeableViewPager(Context context) {
+
+    private static final int MIN_DRAG_VALUE = 20;
+    private Float lastY = null;
+    private Float lastX = null;
+
+    public InterceptAllVerticalSwipesViewPager(Context context) {
         super(context);
         setMyScroller();
     }
 
-    public NonSwipeableViewPager(Context context, AttributeSet attrs) {
+    public InterceptAllVerticalSwipesViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMyScroller();
     }
 
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        Log.d("oite", "Got touch event " + event.toString() );
-        // Never allow swiping to switch between pages
-        return false;
-    }
+        // really ugly fix to let viewpager swipe not get intercepted by recycler view.
+        // Returns always true if motion event swipes vertically
+        // Thus NO CHILD VIEW WILL EVER GET TRIGGERED ON VERTICAL SWIPE EVENTS!
+        // this might cause some bugs
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // Never allow swiping to switch between pages
-        return false;
-    }
+        if(lastX == null) {
+            lastX = event.getX();
+        }
+        if(lastY == null) {
+            lastY = event.getY();
+        }
 
+
+        float xDiff = Math.abs(lastX - event.getX());
+        float yDiff = Math.abs(lastY - event.getY());
+
+        lastX = event.getX();
+        lastY = event.getY();
+
+        if(event.getAction() == MotionEvent.ACTION_MOVE  && xDiff != 0 && xDiff > yDiff && xDiff > MIN_DRAG_VALUE) {
+                return true;
+        }
+
+        return super.onInterceptTouchEvent(event);
+
+    }
     //down one is added for smooth scrolling
 
     private void setMyScroller() {

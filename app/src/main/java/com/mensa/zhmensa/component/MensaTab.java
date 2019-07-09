@@ -1,12 +1,14 @@
 package com.mensa.zhmensa.component;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -47,22 +49,24 @@ import java.util.List;
  */
 
 public class MensaTab {
+
     /**
      * Unqiue Mensa Id that links this tab to a mensa object.
      */
-   private final String mensaId;
+    private final String mensaId;
 
     /**
      * Create Mensatab for a given mensaId.
      * Mensa ID must map to a mensa stored in MensaManager
+     *
      * @param mensaId the unique mensa id
      */
-    public MensaTab(String mensaId){
+    public MensaTab(String mensaId) {
         this.mensaId = mensaId;
     }
 
+
     /**
-     *
      * @param weekday
      * @return a fragment that contains the view for a given weekday
      */
@@ -73,7 +77,7 @@ public class MensaTab {
 
     /**
      * Fragment view for a given day.
-     *
+     * <p>
      * Layout:
      * |--------------------------------------|
      * |      Lunch        |      Dinner      |
@@ -94,10 +98,13 @@ public class MensaTab {
      * |                                      |
      * |--------------------------------------|
      */
-    public static class MensaWeekdayTabFragment extends  Fragment {
+    public static class MensaWeekdayTabFragment extends Fragment {
+
+        private TabAdapter adapter;
 
         /**
          * Creates a new instance. This function is used, since fragments get called with an empty constructor from android OS
+         *
          * @param mensaId unique mensa id that maps to a mensa in mensa manager
          * @param weekday requested weekday
          * @return Fragment that displays to tabs with menus for lunch or dinner
@@ -124,15 +131,16 @@ public class MensaTab {
             ViewPager vp = view.findViewById(R.id.viewpager_weekday_content);
 
 
-            TabAdapter adapter = new TabAdapter(getChildFragmentManager());
+            adapter = new TabAdapter(getChildFragmentManager());
             TabLayout tabLayout = view.findViewById(R.id.tablayout_weekday_content);
 
             String mensaId = getArguments().getString("mensaId");
             String weekdayStr = getArguments().getString("weekday");
 
+            Log.e("MensaTab.ocw", "new viewpager: " + vp.toString() + "\n mensaId " + mensaId + " wekk:" + weekdayStr);
 
 
-            for(Mensa.MenuCategory category : Mensa.MenuCategory.values()) {
+            for (Mensa.MenuCategory category : Mensa.MenuCategory.values()) {
                 String categoryStr = new Gson().toJson(category);
 
                 Fragment f = MenuTabContentFragment.newInstance(mensaId, weekdayStr, categoryStr);
@@ -145,11 +153,19 @@ public class MensaTab {
             return view;
         }
 
+        public void notifyDatasetChanged() {
+            if (adapter == null) {
+                // View not created yet
+                Log.e("MensaTab.ndc", "Adapter was null for mensa and day: " + getArguments().getString("mensaId", "null") + " " + getArguments().getString("weekday", "null"));
+                return;
+            }
+            adapter.notifyDataSetChanged();
+        }
     }
 
     /**
      * Fragment view for a given list of menus (Dinner / Lunch).
-     *
+     * <p>
      * Layout:
      * |--------------------------------------|
      * |                                      |
@@ -170,14 +186,21 @@ public class MensaTab {
      */
     public static class MenuTabContentFragment extends Fragment {
 
+        private MenuCardAdapter adapter;
+        private String mensaId;
+        private Mensa.MenuCategory category;
+        private Mensa.Weekday weekday;
+        private List<IMenu> menuList;
+
         /**
          * Creates a new instance. This function is used, since fragments get called with an empty constructor from android OS
-         * @param mensaId unique mensa id that maps to a mensa in mensa manager
-         * @param weekdayStr requested weekday.  Gets Mapped using JSON to Weekday class
+         *
+         * @param mensaId     unique mensa id that maps to a mensa in mensa manager
+         * @param weekdayStr  requested weekday.  Gets Mapped using JSON to Weekday class
          * @param categoryStr requested category. Gets Mapped using JSON to Category class
          * @return Fragment that displays to tabs with menus for lunch or dinner
          */
-        public static MenuTabContentFragment newInstance(String mensaId, String weekdayStr, String categoryStr){
+        public static MenuTabContentFragment newInstance(String mensaId, String weekdayStr, String categoryStr) {
             Bundle args = new Bundle();
 
             args.putString("mensaId", mensaId);
@@ -198,16 +221,34 @@ public class MensaTab {
 
             RecyclerView recyclerView = view.findViewById(R.id.menusRecyclerView);
             recyclerView.setLayoutManager(new LinearLayoutManager(this.getActivity()));
+
             recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-            String mensaId = getArguments().getString("mensaId");
-            Mensa.MenuCategory category = new Gson().fromJson(getArguments().getString("category"), Mensa.MenuCategory.class);
-            Mensa.Weekday weekday = new Gson().fromJson(getArguments().getString("weekday"), Mensa.Weekday.class);
+            mensaId = getArguments().getString("mensaId");
+            category = new Gson().fromJson(getArguments().getString("category"), Mensa.MenuCategory.class);
+            weekday = new Gson().fromJson(getArguments().getString("weekday"), Mensa.Weekday.class);
 
-            List<IMenu> menuList = MensaManager.getMenusForIdWeekAndCat(mensaId, category, weekday);
+            menuList = MensaManager.getMenusForIdWeekAndCat(mensaId, category, weekday);
+            adapter = new MenuCardAdapter(menuList);
+            recyclerView.setAdapter(adapter);
 
-            recyclerView.setAdapter(new MenuCardAdapter(menuList));
             return view;
+        }
+
+
+        public void notifyDatasetChanged() {
+            if (adapter == null) {
+                Log.e("MensaTab.ndc", "adapter was null for " + String.valueOf(mensaId) + String.valueOf(category) + String.valueOf(weekday));
+                return;
+            }
+
+            if (menuList != null) {
+                Log.d("MenTabContentFrag", "notifyDatasetChanged() going to rebuild set. Mensa:" + mensaId);
+                menuList.clear();
+                menuList.addAll(MensaManager.getMenusForIdWeekAndCat(mensaId, category, weekday));
+            }
+
+            adapter.notifyDataSetChanged();
         }
     }
 }

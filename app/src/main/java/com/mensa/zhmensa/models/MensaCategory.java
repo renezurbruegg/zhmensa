@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.Nullable;
 
+import com.mensa.zhmensa.services.Helper;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,5 +50,12 @@ public abstract class MensaCategory {
     public boolean containsMensa(Mensa mensa) {
         // Default. Needs to be overriden by subclass
         return knownMensas.contains(mensa.getUniqueId());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof  MensaCategory)
+            return Helper.firstNonNull(displayName, "").equals(((MensaCategory)obj).getDisplayName());
+        return false;
     }
 }

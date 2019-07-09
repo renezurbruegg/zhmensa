@@ -105,4 +105,11 @@ public class Menu implements IMenu{
     public int compareTo(IMenu otherMenu) {
         return Helper.firstNonNull(getName(), "").toLowerCase().compareTo(Helper.firstNonNull(otherMenu.getName(),"").toLowerCase());
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if( obj instanceof  IMenu)
+            return Helper.firstNonNull(getId(), "").equals(((IMenu)obj).getId());
+        return false;
+    }
 }

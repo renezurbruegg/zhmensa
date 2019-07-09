@@ -1,9 +1,11 @@
 package com.mensa.zhmensa.services;
 
 
+import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.mensa.zhmensa.models.Mensa;
 
 public class HttpUtils {
     private static final String BASE_URL = "http://api.twitter.com/1/";
@@ -25,6 +27,8 @@ public class HttpUtils {
     public static void postByUrl(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.post(url, params, responseHandler);
     }
+
+
 
     private static String getAbsoluteUrl(String relativeUrl) {
         return BASE_URL + relativeUrl;
