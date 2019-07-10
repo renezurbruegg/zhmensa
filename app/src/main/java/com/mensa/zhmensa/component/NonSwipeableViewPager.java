@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.component;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.util.AttributeSet;
@@ -34,10 +35,16 @@ public class NonSwipeableViewPager extends ViewPager {
         return false;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         // Never allow swiping to switch between pages
         return false;
+    }
+
+    @Override
+    public void setCurrentItem(int item) {
+        super.setCurrentItem(item);
     }
 
     //down one is added for smooth scrolling
@@ -54,7 +61,7 @@ public class NonSwipeableViewPager extends ViewPager {
     }
 
     public class MyScroller extends Scroller {
-        public MyScroller(Context context) {
+        MyScroller(Context context) {
             super(context, new DecelerateInterpolator());
         }
 

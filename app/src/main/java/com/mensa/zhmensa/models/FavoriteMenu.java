@@ -1,5 +1,9 @@
 package com.mensa.zhmensa.models;
 
+/**
+ * Implementation for a menu in the favorite tab.
+ * Get name returns not only it's name but also appends the mensa name
+ */
 public class FavoriteMenu extends Menu {
     private final String mensaName;
 

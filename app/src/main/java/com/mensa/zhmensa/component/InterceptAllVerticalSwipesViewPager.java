@@ -2,6 +2,7 @@ package com.mensa.zhmensa.component;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
@@ -11,12 +12,15 @@ import androidx.viewpager.widget.ViewPager;
 import java.lang.reflect.Field;
 
 /**
- * Viewpager implemnetation that does change tabs on left / right swipe
+ * Viewpager implementation that does change tabs on left / right swipe
  */
 public class InterceptAllVerticalSwipesViewPager extends ViewPager {
 
-
+    /**
+     * Min value a finger has to move to trigger swiping action
+     */
     private static final int MIN_DRAG_VALUE = 20;
+
     private Float lastY = null;
     private Float lastX = null;
 
@@ -30,6 +34,11 @@ public class InterceptAllVerticalSwipesViewPager extends ViewPager {
         setMyScroller();
     }
 
+
+    @Override
+    public void setCurrentItem(int item) {
+        super.setCurrentItem(item);
+    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
@@ -73,7 +82,7 @@ public class InterceptAllVerticalSwipesViewPager extends ViewPager {
     }
 
     public class MyScroller extends Scroller {
-        public MyScroller(Context context) {
+        MyScroller(Context context) {
             super(context, new DecelerateInterpolator());
         }
 

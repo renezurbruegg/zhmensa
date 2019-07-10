@@ -19,10 +19,7 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Observable;
-import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,16 +30,16 @@ import cz.msebera.android.httpclient.Header;
 public class UzhMensaCategory extends MensaCategory {
 
     private static final MensaApiRoute[] ROUTES = {
-            new MensaApiRoute(147, "UZH untere Mensa A", Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(148, "UZH obere Mensa B", Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(150, "UZH Lichthof", Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(180, "UZH Irchel",Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(146, "ZH Tierspital",Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(151, "UZH Zentrum Für Zahnmedizin",Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(143, "ZH Platte",Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(346, "UZH Rämi 59 (vegan)",Mensa.MenuCategory.LUNCH),
-            new MensaApiRoute(149, "UZH untere Mensa A",Mensa.MenuCategory.DINNER),
-            new MensaApiRoute(256, "UZH Irchel",Mensa.MenuCategory.DINNER),
+            new MensaApiRoute(147, "Untere Mensa A", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(148, "Obere Mensa B", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(150, "Lichthof", Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(180, "Irchel",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(146, "Tierspital",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(151, "Zentrum Für Zahnmedizin",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(143, "Platte",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(346, "Rämi 59 (vegan)",Mensa.MenuCategory.LUNCH),
+            new MensaApiRoute(149, "Untere Mensa A",Mensa.MenuCategory.DINNER),
+            new MensaApiRoute(256, "Irchel",Mensa.MenuCategory.DINNER),
     };
     /**
      *         "UZH untere Mensa A": 147,
@@ -56,10 +53,13 @@ public class UzhMensaCategory extends MensaCategory {
      *            "UZH untere Mensa A (abend)": 149,
      * "UZH Irchel (abend)": 256
      */
-    private final Set<Integer> servedRoutes = new HashSet<>();
 
     public UzhMensaCategory(String displayName) {
         super(displayName);
+    }
+
+    public UzhMensaCategory(String displayName, List<String> knownMensaIds) {
+        super(displayName, knownMensaIds);
     }
 
 
@@ -82,19 +82,20 @@ public class UzhMensaCategory extends MensaCategory {
     private static class MensaApiRoute {
         public int id;
         public String name;
-        public Mensa.MenuCategory mealType;
+        Mensa.MenuCategory mealType;
 
-        public MensaApiRoute(int id, String name, Mensa.MenuCategory mealType) {
+        MensaApiRoute(int id, String name, Mensa.MenuCategory mealType) {
             this.mealType = mealType;
             this.id = id;
             this.name = name;
         }
     }
+
     private class XMLResponseHandler extends AsyncHttpResponseHandler {
         private final MensaListObservable observable;
         private final MensaApiRoute apiRoute;
 
-        public XMLResponseHandler(MensaListObservable observable, MensaApiRoute apiRoute) {
+        XMLResponseHandler(MensaListObservable observable, MensaApiRoute apiRoute) {
             this.observable = observable;
             this.apiRoute = apiRoute;
         }
@@ -104,23 +105,17 @@ public class UzhMensaCategory extends MensaCategory {
        //     Log.e("reposne", new String(responseBody));
             try {
                 Mensa m = parseXML(apiRoute.name, responseBody, observable.day, observable.mealType);
-               // Log.e("pushing:", m.toString());
-                observable.addNewMensa(m);
-                servedRoutes.add(apiRoute.id);
-                Log.d("size:" , "served " + servedRoutes.size());
-                Log.d("size:" , "routes " + ROUTES.length);
 
-                // TODO lock
-            //    if(servedRoutes.size() == ROUTES.length) {
-                //    observable.notifyAllObservers();
-               //     servedRoutes.clear();
-              //  }
+                observable.addNewMensa(m);
 
             } catch (IOException e) {
+                Log.e("UZHMensa.parse", "could not parse string: " + new String(responseBody) + " error: " + e.getMessage());
                 e.printStackTrace();
             } catch (SAXException e) {
+                Log.e("UZHMensa.parse", "could not parse string: " + new String(responseBody) + " error: " + e.getMessage());
                 e.printStackTrace();
             } catch (ParserConfigurationException e) {
+                Log.e("UZHMensa.parse", "could not parse string: " + new String(responseBody) + " error: " + e.getMessage());
                 e.printStackTrace();
             }
 
@@ -129,15 +124,11 @@ public class UzhMensaCategory extends MensaCategory {
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
             Log.e("fail", error.getMessage());
+            Log.e("response: ", new String(responseBody));
             Log.e("id:", apiRoute.id+ "");
-            servedRoutes.add(apiRoute.id);
-            if(servedRoutes.size() == ROUTES.length) {
-                observable.notifyAllObservers();
-                servedRoutes.clear();
-            }
 
+            error.printStackTrace();
         }
-
 
 
         private Mensa parseXML(String name, byte[] xmlFile, Mensa.Weekday day, Mensa.MenuCategory mealType) throws  IOException, SAXException, ParserConfigurationException {
@@ -150,35 +141,28 @@ public class UzhMensaCategory extends MensaCategory {
             NodeList nList = doc.getElementsByTagName("summary");
             Node summaryNode = nList.item(0);
 
-            Node divNode = null;
-
-//            Log.d("sum node", summaryNode.getNodeName());
-
-
-  //          Log.d("length", summaryNode.getChildNodes().getLength() + "");
             for (int i = 0; i < summaryNode.getChildNodes().getLength(); i++) {
                 Node n = summaryNode.getChildNodes().item(i);
                 if(n.getNodeName().equals("div")) {
+                    // Found a new Mensa. Mensa are always in first div element
                     Mensa m = new Mensa(name, name);
                     m.setMenuForDayAndCategory(day,mealType,getMensaFromDivNode(name, mealType, n));
                     return m;
                 }
-         //       Log.d("n", n.getNodeName());
             }
 
             return new Mensa("Error no div node found", "ERROR");
-
         }
 
 
         private String domAsString(Node rootnode) {
-            String retString = trimString(rootnode.getNodeValue()) + (rootnode.getNodeName().equals("#text") ? " " : "\n");
+            StringBuilder retString = new StringBuilder(trimString(rootnode.getNodeValue()) + (rootnode.getNodeName().equals("#text") ? " " : "\n"));
             NodeList children = rootnode.getChildNodes();
             for (int i = 0; i < children.getLength(); i++) {
-                retString  += domAsString(children.item(i));
+                retString.append(domAsString(children.item(i)));
             }
 
-            return retString;
+            return retString.toString();
         }
         private String trimString(String stringToTrim) {
             if(stringToTrim == null) {
@@ -195,6 +179,7 @@ public class UzhMensaCategory extends MensaCategory {
                 Node n = divNode.getChildNodes().item(i);
 
                 if(n.getNodeName().equals("h3")) {
+                    // Found Begin of menu
                     currentMenu = new Menu(null, null,null,null,null);
                     menuList.add(currentMenu);
 
@@ -207,11 +192,11 @@ public class UzhMensaCategory extends MensaCategory {
                 }
 
                 if(n.getNodeName().equals("p")) {
-
+                    if(currentMenu == null)
+                        continue;
+                    // Found Description
                     currentMenu.setDescription(domAsString(n));
-         //           Log.d("string, " , currentMenu.toString());
                 }
-           //     Log.d("n", n.getNodeName());
             }
             return menuList;
         }

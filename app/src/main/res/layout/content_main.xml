@@ -20,7 +20,7 @@
         android:id="@+id/appBarLayout2">
 
         <com.mensa.zhmensa.component.NonSwipeableViewPager
-            android:id="@+id/main_viewpager"
+            android:id="@+id/main_viewpager_week"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"

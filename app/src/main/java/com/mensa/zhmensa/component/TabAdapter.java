@@ -21,17 +21,17 @@ public class TabAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
+
         return mFragmentList.get(position);
     }
 
-    public void addFragment(Fragment fragment, String title) {
+    void addFragment(Fragment fragment, String title) {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
     }
 
     @Override
     public void notifyDataSetChanged() {
-        super.notifyDataSetChanged();
         for (Fragment frag : mFragmentList) {
             if(frag instanceof MensaTab.MensaWeekdayTabFragment) {
                 ((MensaTab.MensaWeekdayTabFragment) frag).notifyDatasetChanged();
@@ -40,6 +40,7 @@ public class TabAdapter extends FragmentStatePagerAdapter {
                 ((MensaTab.MenuTabContentFragment) frag).notifyDatasetChanged();
             }
         }
+        super.notifyDataSetChanged();
     }
 
     @Nullable

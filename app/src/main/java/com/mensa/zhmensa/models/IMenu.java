@@ -1,20 +1,25 @@
 package com.mensa.zhmensa.models;
 
+/**
+ * Interface that wraps every meal into an object.
+ */
 public interface IMenu extends Comparable<IMenu> {
 
-    public String getName();
+    String getName();
 
-    public String getDescription();
+    String getDescription();
 
-    public String getPrices();
+    String getPrices();
 
-    public String getId();
+    String getId();
 
-    public String getAllergene();
+    String getAllergene();
 
-    public boolean isFavorite();
-
-    public void setFavorite(boolean isFavorite);
+    boolean isFavorite();
 
     String getMeta();
+
+    void setName(String name);
+
+    String getSharableString();
 }

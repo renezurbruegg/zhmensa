@@ -21,9 +21,9 @@ import com.mensa.zhmensa.services.MensaManager;
  * Simple implementation for a Mensa Menu view.
  * This class is used in the MenuCardAdapter that calls the bind function, to load the values of a menu into a card.
  */
-public class MenuViewHolder extends RecyclerView.ViewHolder {
+class MenuViewHolder extends RecyclerView.ViewHolder {
 
-    public MenuViewHolder(@NonNull View itemView) {
+    MenuViewHolder(@NonNull View itemView) {
         super(itemView);
     }
 
@@ -32,18 +32,18 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
      */
-    public static void bind(MenuViewHolder viewHolder, final IMenu menu, final Context ctx) {
+    static void bind(MenuViewHolder viewHolder, final IMenu menu, final Context ctx) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
         ((TextView) viewHolder.itemView.findViewById(R.id.allergene)).setText(menu.getAllergene());
 
-        final ImageButton favBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.bookmark_button);
+        final ImageButton favBtn = viewHolder.itemView.findViewById(R.id.bookmark_button);
 
 
-        final ImageButton shareBtn = (ImageButton)viewHolder.itemView.findViewById(R.id.share_button);
-        final LinearLayout showMoreLayout = (LinearLayout) viewHolder.itemView.findViewById(R.id.showmore_layout);
-        final ImageButton showMoreBtn = (ImageButton) viewHolder.itemView.findViewById(R.id.showmore_button);
+        final ImageButton shareBtn = viewHolder.itemView.findViewById(R.id.share_button);
+        final LinearLayout showMoreLayout = viewHolder.itemView.findViewById(R.id.showmore_layout);
+        final ImageButton showMoreBtn = viewHolder.itemView.findViewById(R.id.showmore_button);
 
         if(Helper.firstNonNull(menu.getMeta(),"").equals("dummy")) {
 
@@ -77,7 +77,7 @@ public class MenuViewHolder extends RecyclerView.ViewHolder {
             public void onClick(View view) {
                 Intent i = new Intent(android.content.Intent.ACTION_SEND);
                 i.setType("text/plain");
-                i.putExtra(android.content.Intent.EXTRA_TEXT, menu.toString());
+                i.putExtra(android.content.Intent.EXTRA_TEXT, menu.getSharableString());
                 ctx.startActivity(Intent.createChooser(i, "Share"));
             }
         });

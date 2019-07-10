@@ -3,8 +3,10 @@ package com.mensa.zhmensa.models;
 
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 
 import java.util.ArrayList;
@@ -18,10 +20,12 @@ import java.util.Observable;
  * E.G. UZH, ETH ...
  */
 public abstract class MensaCategory {
+    @NonNull
     private final List<String> knownMensas;
     /**
      * Name that is displayed inside the drawer
      */
+    @NonNull
     private String displayName;
 
     public MensaCategory(String displayName) {
@@ -29,25 +33,25 @@ public abstract class MensaCategory {
     }
 
     public MensaCategory(String catName, List<String> mensaIds) {
-        this.displayName = catName;
+        this.displayName = Helper.firstNonNull(catName,"");
         knownMensas = new ArrayList<>(mensaIds);
     }
 
+    @NonNull
     public String getDisplayName() {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
     @Nullable
     public Integer getCategoryIconId() {
-        return null;
+        return R.drawable.ic_eth_2;
     }
+
     public abstract List<MensaListObservable> loadMensasFromAPI();
 
-    public boolean containsMensa(Mensa mensa) {
+    public boolean containsMensa(@Nullable Mensa mensa) {
+        if(mensa == null)
+            return false;
         // Default. Needs to be overriden by subclass
         return knownMensas.contains(mensa.getUniqueId());
     }
@@ -55,7 +59,7 @@ public abstract class MensaCategory {
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof  MensaCategory)
-            return Helper.firstNonNull(displayName, "").equals(((MensaCategory)obj).getDisplayName());
+            return getDisplayName().equals(((MensaCategory)obj).getDisplayName());
         return false;
     }
 }

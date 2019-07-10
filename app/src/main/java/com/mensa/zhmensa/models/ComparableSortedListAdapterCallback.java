@@ -1,21 +1,25 @@
 package com.mensa.zhmensa.models;
 
-import android.widget.Adapter;
-
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
-import com.mensa.zhmensa.component.MenuViewHolder;
-
+/**
+ * Implementation of simple callback to keep menus inside recyclerview in order.
+ * @param <T> Comparable type that is stored in the list and should be ordered
+ */
 public class ComparableSortedListAdapterCallback<T extends  Comparable> extends SortedList.Callback<T> {
 
     private final RecyclerView.Adapter adapter;
+
     public ComparableSortedListAdapterCallback(RecyclerView.Adapter adapter) {
         this.adapter = adapter;
     }
 
     @Override
     public int compare(Comparable o1, Comparable o2) {
+        if(o1 == null || o2 == null)
+            return -1;
+
         return o1.compareTo(o2);
     }
 

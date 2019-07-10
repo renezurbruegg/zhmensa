@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.navigation;
 
+import androidx.annotation.Nullable;
+
 import com.mensa.zhmensa.models.Mensa;
 
 public class NavigationMenuChild implements  Comparable<NavigationMenuChild>{
@@ -16,7 +18,9 @@ public class NavigationMenuChild implements  Comparable<NavigationMenuChild>{
     }
 
     @Override
-    public int compareTo(NavigationMenuChild navigationMenuChild) {
+    public int compareTo(@Nullable NavigationMenuChild navigationMenuChild) {
+        if(navigationMenuChild == null)
+            return 1;
         return mensa.compareTo(navigationMenuChild.mensa);
     }
 }

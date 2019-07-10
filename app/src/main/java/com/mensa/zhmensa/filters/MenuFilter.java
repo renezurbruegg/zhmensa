@@ -4,7 +4,7 @@ import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Mensa;
 
 /**
- * Not used right now
+ * Filter interface for a Menu object
  */
 public interface MenuFilter {
 

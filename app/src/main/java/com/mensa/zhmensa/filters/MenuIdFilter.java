@@ -2,6 +2,9 @@ package com.mensa.zhmensa.filters;
 
 import com.mensa.zhmensa.models.IMenu;
 
+/**
+ * Filter implementation that filters on a given menu id
+ */
 public class MenuIdFilter implements MenuFilter {
 
     private final String menuId;

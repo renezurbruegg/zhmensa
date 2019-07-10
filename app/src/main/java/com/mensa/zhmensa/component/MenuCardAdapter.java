@@ -39,6 +39,11 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
         }
     }
 
+    public void setItems(List<IMenu> items ){
+        this.menus.clear();
+        this.menus.addAll(items);
+    }
+
 
     @NonNull
     @Override
@@ -61,4 +66,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     }
 
 
+    public SortedList<IMenu> getItems() {
+        return menus;
+    }
 }

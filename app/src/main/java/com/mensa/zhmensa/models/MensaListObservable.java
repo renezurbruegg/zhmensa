@@ -20,25 +20,20 @@ public class MensaListObservable extends Observable implements Serializable {
         return newItems;
     }
 
-    public List<Mensa> getAllItems() {
-        return mensaList;
-    }
-
     public final Mensa.Weekday day;
     public final Mensa.MenuCategory mealType;
 
-    public MensaListObservable(Mensa.Weekday day, Mensa.MenuCategory mealType) {
+    MensaListObservable(Mensa.Weekday day, Mensa.MenuCategory mealType) {
         this.day = day;
         this.mealType = mealType;
     }
-
 
     public void clear() {
         mensaList.clear();
         newItems.clear();
     }
 
-    public void addNewMensaList(List<Mensa> mensas) {
+    void addNewMensaList(List<Mensa> mensas) {
         newItems.clear();
         newItems.addAll(mensas);
         mensaList.addAll(mensas);
@@ -59,7 +54,7 @@ public class MensaListObservable extends Observable implements Serializable {
 
         notifyObservers(mensas);
     }
-    public void addNewMensa(Mensa... mensas) {
+    void addNewMensa(Mensa... mensas) {
         addNewMensaList(Arrays.asList(mensas));
     }
 
@@ -68,7 +63,7 @@ public class MensaListObservable extends Observable implements Serializable {
         mensaList.add(mensa);
     }
 
-    public void notifyAllObservers() {
+    void notifyAllObservers() {
         Collections.sort(mensaList, new Comparator<Mensa>() {
             @Override
             public int compare(Mensa mensa, Mensa mensa2) {

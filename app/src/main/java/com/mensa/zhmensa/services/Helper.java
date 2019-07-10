@@ -1,6 +1,6 @@
 package com.mensa.zhmensa.services;
 
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -16,6 +16,7 @@ import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.MensaCategory;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -27,6 +28,8 @@ public class Helper {
     private static Gson gson;
 
     private static final String[] UNIQUE_MENU_MENSA = {"Tannebar"};
+    @SafeVarargs
+    @NonNull
     public static <T> T firstNonNull(T... objects){
         for (T obj: objects) {
             if(obj != null)
@@ -35,26 +38,44 @@ public class Helper {
         return null;
     }
 
+    /**
+     * Gets an id for a given menu. Id will be the same for all similar menus (e.g. Green from Polyterasse)
+     * @param mensaName
+     * @param menuName
+     * @param loadIndex
+     * @param mealType
+     * @return
+     */
     public static String getIdForMenu(String mensaName, String menuName, int loadIndex, Mensa.MenuCategory mealType) {
-        if(isUniqueMenueName(mensaName, menuName)) {
+        if(isDubiousMenuName(mensaName, menuName)) {
             return "'uni:" + mensaName + "' pos: " + loadIndex + " mealtype:" + mealType;
         }
         return "mensa:" + mensaName + ",Menu:" + menuName;
     }
 
 
-
-    private static boolean isUniqueMenueName(String mensaName, String menuName) {
+    /**
+     * Checks if a mensa has unique menu names.
+     * E.g. Tannebar always changes the names (Burritos, Mezze.) and therefore this function will return true
+      * @param mensaName the mensa name
+     * @param menuName the menu name
+     * @return true if name is not unqiue, false otherwise
+     */
+    private static boolean isDubiousMenuName(String mensaName, String menuName) {
        for (String mensa : UNIQUE_MENU_MENSA) {
            if(mensa.equals(mensaName)) {
                return true;
            }
        }
        return false;
-    };
+    }
 
 
-    public static DateTime getStartOfWeek() {
+    /**
+     *
+     * @return the dstart of this week as date time object
+     */
+    private static DateTime getStartOfWeek() {
         DateTime dateTime = new DateTime(System.currentTimeMillis());
 
         if(dateTime.getDayOfWeek() > 5) {
@@ -62,36 +83,22 @@ public class Helper {
         }
 
         return dateTime.withDayOfWeek(1);
-
-   /*     long firstDayOfWeekTimestamp = dateTime.withDayOfWeek(1).getMillis();
-
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MM/dd/yyyy");
-        Log.d("current dt", dtfOut.print(dateTime));
-        if(dateTime.getDayOfWeek() > 5) {
-            Log.d("datetime", "Found saturda or Sunday");
-            dateTime.plusWeeks(1);
-            Log.d("current dt", dtfOut.print(dateTime.plusWeeks(1)));
-        }
-
-        return "";*/
     }
 
+    /**
+     * Current start of the week day in formet yyyy-MM-dd
+     * @param offset
+     * @return
+     */
     public static String getDay(int offset) {
         DateTime date = getStartOfWeek().plusDays(offset);
         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd");
         return dtfOut.print(date);
-/*        Date date = new Date(System.currentTimeMillis());
-
-        // Conversion
-        SimpleDateFormat sdf;
-        sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setTimeZone(TimeZone.getTimeZone("MESZ"));
-        return sdf.format(date);*/
     }
 
 
 
-    public static String convertMensaToJsonString(Mensa mensa) {
+    static String convertMensaToJsonString(Mensa mensa) {
         if(gson == null)
             gson = new GsonBuilder().registerTypeAdapter(IMenu.class, new InterfaceAdapter<IMenu>())
                     .registerTypeAdapter(MensaCategory.class, new InterfaceAdapter<MensaCategory>())
@@ -100,22 +107,15 @@ public class Helper {
         return gson.toJson(mensa);
     }
 
-    public static Mensa getMensaFromJsonString(String jsonString) {
+    static Mensa getMensaFromJsonString(String jsonString) {
         if(gson == null)
             gson = new GsonBuilder().registerTypeAdapter(IMenu.class, new InterfaceAdapter<IMenu>())
                     .registerTypeAdapter(MensaCategory.class, new InterfaceAdapter<MensaCategory>())
                     .create();
 
 
-        Mensa mensa =  gson.fromJson(jsonString, Mensa.class);
-        /*Log.d("gmfjs","Loaded mensa " + mensa.getDisplayName());
-        for (Mensa.Weekday day: Mensa.Weekday.values()) {
-            for (Mensa.MenuCategory manuCat : Mensa.MenuCategory.values()){
-                Log.d(day + ": " + manuCat, mensa.getMenusForDayAndCategory(day, manuCat).toString());
-            }
+        return gson.fromJson(jsonString, Mensa.class);
 
-        }*/
-        return mensa;
     }
 
 
@@ -133,6 +133,14 @@ public class Helper {
                 return "Fr";
         }
         return String.valueOf(day);
+    }
+
+    /**
+     *
+     * @return 0 for monday, 4 for friday...
+     */
+    static int getCurrentDay() {
+        return Math.min(new DateTime(System.currentTimeMillis()).getDayOfWeek() , DateTimeConstants.FRIDAY) - DateTimeConstants.MONDAY;
     }
 
     public String getLanguageCode() {

@@ -1,6 +1,9 @@
 package com.mensa.zhmensa.models;
 
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -9,61 +12,75 @@ import com.mensa.zhmensa.services.MensaManager;
  */
 public class Menu implements IMenu{
 
+    @Nullable
     private String name;
+    @Nullable
     private String description;
+    @Nullable
     private String prices;
+    @Nullable
     private String allergene;
+    @Nullable
     private String meta;
-    private boolean favorite;
+    @NonNull
     private String id;
 
 
 
-    public Menu(String id, String name, String description, String prices, String allergene, String meta) {
+    public Menu(@Nullable String id,@Nullable String name,@Nullable String description,@Nullable String prices, @Nullable String allergene,@Nullable String meta) {
         this.name = name;
         this.description = description;
         this.prices = prices;
         this.allergene = allergene;
         this.meta = meta;
-        this.id = id;
+        setId(id);
     }
 
     public Menu(String id, String name, String description, String prices, String allergene) {
         this(id, name, description, prices, allergene, null);
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(@Nullable String id) {
+        if(id == null)
+            this.id = System.currentTimeMillis() +"";
+        else
+            this.id = id;
     }
+
+    @Nullable
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
+    @Nullable
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    void setDescription(@Nullable String description) {
         this.description = description;
     }
 
+    @Nullable
     public String getPrices() {
         return prices;
     }
 
     @Override
+    @NonNull
     public String getId() {
         return id;
     }
 
-    public void setPrices(String prices) {
+    void setPrices(@Nullable String prices) {
         this.prices = prices;
     }
 
+    @Nullable
     public String getAllergene() {
         return "Allergene: " + allergene;
     }
@@ -73,43 +90,58 @@ public class Menu implements IMenu{
        return MensaManager.isFavorite(getId());
     }
 
-    @Override
-    public void setFavorite(boolean isFavorite) {
-        this.favorite = isFavorite;
-    }
-
-    public void setAllergene(String allergene) {
+    public void setAllergene(@Nullable String allergene) {
         this.allergene = allergene;
     }
 
+    @Nullable
     public String getMeta() {
         return meta;
     }
 
-    public void setMeta(String meta) {
+    public void setMeta(@Nullable String meta) {
         this.meta = meta;
+    }
+
+
+    public String getSharableString() {
+       return getName() +
+                "\n" +
+                getPrices() +
+                "\n" +
+                getDescription();
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getName());
-        sb.append("\n");
-        sb.append(getPrices());
-        sb.append("\n");
-        sb.append(getDescription());
-        return sb.toString();
+        return getName();
     }
 
     @Override
-    public int compareTo(IMenu otherMenu) {
+    public int compareTo(@Nullable IMenu otherMenu) {
+        if(otherMenu == null)
+            return 1;
+
         return Helper.firstNonNull(getName(), "").toLowerCase().compareTo(Helper.firstNonNull(otherMenu.getName(),"").toLowerCase());
+    }
+
+    @NonNull
+    private String getAsComparableString() {
+        return id + /*name + */  description;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if( obj instanceof  IMenu)
-            return Helper.firstNonNull(getId(), "").equals(((IMenu)obj).getId());
+        if( obj instanceof  Menu) {
+            return getAsComparableString().equals(((Menu) obj).getAsComparableString());
+        } else  if (obj instanceof IMenu) {
+            return Helper.firstNonNull(getId(), "").equals(((IMenu) obj).getId());
+        }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Helper.firstNonNull(getId(),"").hashCode();
     }
 }

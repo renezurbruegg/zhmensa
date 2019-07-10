@@ -1,26 +1,25 @@
 package com.mensa.zhmensa.models;
 
-import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.services.Helper;
+import android.util.Log;
 
-import java.util.Arrays;
+import com.mensa.zhmensa.R;
+
 import java.util.Collections;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Set;
 
 
 /**
- * Dummy implementation for a mensa. only for testing
+ * Implementation for a favorite mensa.
+ * Offers remove Menu from list function
  */
 public class FavoriteMensa extends Mensa {
 
     public FavoriteMensa(String displayName) {
         super(displayName, displayName);
-        setMensaCategory(new MensaCategory("Favorites") {
 
+        setMensaCategory(new MensaCategory("Favorites") {
             @Override
             public Integer getCategoryIconId() {
                 return R.drawable.ic_favorite_black_24dp;
@@ -31,16 +30,40 @@ public class FavoriteMensa extends Mensa {
                 return Collections.emptyList();
             }
         });
+
     }
 
     public void removeMenuFromList(IMenu menu) {
         for(Weekday day: Weekday.values()) {
+            Map<MenuCategory,Set<IMenu>> mealTypeToMenu = meals.get(day);
+
+            if(mealTypeToMenu == null) {
+                Log.d("FavMensa.remove", "Could not find menu for day: " + day);
+                continue;
+            }
+
             for (MenuCategory cat: MenuCategory.values() ) {
-                Map<MenuCategory,Set<IMenu>> mealTypeToMenu = Helper.firstNonNull(meals.get(day), Collections.<MenuCategory, Set<IMenu>>emptyMap());
-                Set<IMenu> menus = Helper.firstNonNull(mealTypeToMenu.get(cat), Collections.<IMenu>emptySet());
 
-                menus.remove(menu);
+                Set<IMenu> menus = mealTypeToMenu.get(cat);
 
+                if(menus == null) {
+                    Log.d("FavMensa.remove", "Could not find menus for day: and cat: " + day + " " + cat);
+                    continue;
+                }
+                Log.d("FavMensa.remove", "Current menus:" +  menus.toString());
+                IMenu storedMenu = null;
+                for(IMenu sMenu : menus) {
+                    if(sMenu.getId().equals(menu.getId()))
+                        storedMenu = sMenu;
+                }
+                if(storedMenu == null)
+                    continue;
+
+                menus.remove(storedMenu);
+
+                Log.d("FavMensa.remove", "New menus:" +  menus.toString());
+                mealTypeToMenu.put(cat, menus);
+                meals.put(day, mealTypeToMenu);
                 /*ListIterator<IMenu> iter = menus.listIterator();
                 while(iter.hasNext()){
                     if(iter.next().getId().equals(menu.getId())){
@@ -52,6 +75,6 @@ public class FavoriteMensa extends Mensa {
     }
 
     public void addMenu(String mensaName, Weekday day, MenuCategory mealType, IMenu menu) {
-        addMenuForDayAndCategory(day, mealType, Arrays.<IMenu>asList(new FavoriteMenu(mensaName, menu)));
+        addMenuForDayAndCategory(day, mealType, Collections.<IMenu>singletonList(new FavoriteMenu(mensaName, menu)));
     }
 }

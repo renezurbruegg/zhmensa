@@ -1,23 +1,16 @@
 package com.mensa.zhmensa.navigation;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Rect;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
-
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.navigation.NavigationFavoritesHeader;
-import com.mensa.zhmensa.navigation.NavigationMenuChild;
-import com.mensa.zhmensa.navigation.NavigationMenuHeader;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +43,7 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         return childPosition;
     }
 
+    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
@@ -59,7 +53,7 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.list_group_child, null);
+            convertView = inflater.inflate(R.layout.list_group_child, parent, false);
         }
 
         TextView txtListChild = convertView
@@ -100,19 +94,20 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded,
                              View convertView, ViewGroup parent) {
+
         NavigationMenuHeader header = getGroup(groupPosition);
 
 
 
         String headerTitle = header.getDisplayName();
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) this.context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-             convertView = inflater.inflate(R.layout.list_group_header, null);
+            LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-             if(header.category != null && header.category.getCategoryIconId() != null) {
-                 ((TextView) convertView.findViewById(R.id.lblListHeader)).setCompoundDrawablesRelativeWithIntrinsicBounds(header.category.getCategoryIconId(),0,0,0);
-             }
+             convertView = inflater.inflate(R.layout.list_group_header, parent, false);
+        }
+
+        if(header.category != null && header.category.getCategoryIconId() != null) {
+            ((TextView) convertView.findViewById(R.id.lblListHeader)).setCompoundDrawablesRelativeWithIntrinsicBounds(header.category.getCategoryIconId(),0,0,0);
         }
 
         TextView lblListHeader = convertView.findViewById(R.id.lblListHeader);
