@@ -22,4 +22,6 @@ public interface IMenu extends Comparable<IMenu> {
     void setName(String name);
 
     String getSharableString();
+
+    boolean hasAllergene();
 }

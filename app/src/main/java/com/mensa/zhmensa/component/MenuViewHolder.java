@@ -55,8 +55,8 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         }
 
 
-        if(Helper.firstNonNull(menu.getAllergene(),"").isEmpty()) {
-            shareBtn.setVisibility(View.INVISIBLE);
+        if(!menu.hasAllergene()) {
+            showMoreBtn.setVisibility(View.INVISIBLE);
         }
 
 

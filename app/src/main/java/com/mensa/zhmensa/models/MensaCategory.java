@@ -27,6 +27,7 @@ public abstract class MensaCategory {
      */
     @NonNull
     private String displayName;
+    private Long lastUpdated;
 
     public MensaCategory(String displayName) {
         this(displayName, Collections.<String>emptyList());
@@ -61,5 +62,13 @@ public abstract class MensaCategory {
         if(obj instanceof  MensaCategory)
             return getDisplayName().equals(((MensaCategory)obj).getDisplayName());
         return false;
+    }
+    @Nullable
+    public Long lastUpdated() {
+        return lastUpdated;
+    }
+    
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
     }
 }

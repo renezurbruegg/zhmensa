@@ -31,9 +31,9 @@ public class Menu implements IMenu{
         this.name = name;
         this.description = description;
         this.prices = prices;
-        this.allergene = allergene;
         this.meta = meta;
         setId(id);
+        setAllergene(allergene);
     }
 
     public Menu(String id, String name, String description, String prices, String allergene) {
@@ -92,6 +92,9 @@ public class Menu implements IMenu{
 
     public void setAllergene(@Nullable String allergene) {
         this.allergene = allergene;
+        if(this.allergene != null) {
+            this.allergene = this.allergene.replaceAll(" *Allergene *:? *","");
+        }
     }
 
     @Nullable
@@ -110,6 +113,11 @@ public class Menu implements IMenu{
                 getPrices() +
                 "\n" +
                 getDescription();
+    }
+
+    @Override
+    public boolean hasAllergene() {
+        return (allergene != null && !allergene.isEmpty() && !allergene.equals("null"));
     }
 
     @Override

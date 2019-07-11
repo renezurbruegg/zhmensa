@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.services;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
@@ -75,7 +77,7 @@ public class Helper {
      *
      * @return the dstart of this week as date time object
      */
-    private static DateTime getStartOfWeek() {
+    public static DateTime getStartOfWeek() {
         DateTime dateTime = new DateTime(System.currentTimeMillis());
 
         if(dateTime.getDayOfWeek() > 5) {
@@ -91,7 +93,16 @@ public class Helper {
      * @return
      */
     public static String getDay(int offset) {
-        DateTime date = getStartOfWeek().plusDays(offset);
+        return getDay(getStartOfWeek().plusDays(offset));
+
+    }
+
+    /**
+     * Current start of the week day in formet yyyy-MM-dd
+     * @param offset
+     * @return
+     */
+    private static String getDay(DateTime date) {
         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd");
         return dtfOut.print(date);
     }
@@ -142,6 +153,12 @@ public class Helper {
     static int getCurrentDay() {
         return Math.min(new DateTime(System.currentTimeMillis()).getDayOfWeek() , DateTimeConstants.FRIDAY) - DateTimeConstants.MONDAY;
     }
+
+    public static boolean isDataStillValid(Long lastUpdated) {
+            Log.d("lastupdatecheck", "Last updated: " + new DateTime(lastUpdated));
+        return getDay(0).equals(getDay(new DateTime(lastUpdated)));
+    }
+
 
     public String getLanguageCode() {
         return "de";

@@ -26,7 +26,8 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         this.listDataHeader = listDataHeader;
         this.listDataChild = listChildData;
         for (List<NavigationMenuChild> children: listDataChild.values()) {
-            Collections.sort(children);
+            if(children.size() > 1)
+                Collections.sort(children);
         }
 
     }

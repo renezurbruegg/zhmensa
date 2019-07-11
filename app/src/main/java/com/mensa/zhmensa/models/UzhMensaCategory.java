@@ -26,6 +26,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import cz.msebera.android.httpclient.Header;
+import cz.msebera.android.httpclient.client.params.ClientPNames;
 
 public class UzhMensaCategory extends MensaCategory {
 
@@ -71,7 +72,10 @@ public class UzhMensaCategory extends MensaCategory {
             for (MensaApiRoute route : ROUTES) {
                 final MensaListObservable obs = new MensaListObservable(day, route.mealType);
                 obsList.add(obs);
-                HttpUtils.getByUrl("http://zfv.ch/de/menus/rssMenuPlan?menuId=" + route.id + "&&dayOfWeek=" + (day.day + 1), new RequestParams(), new XMLResponseHandler(obs, route));
+                RequestParams par = new RequestParams();
+            //    par.ci
+              //  par.put(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
+                HttpUtils.getByUrl("http://zfv.ch/de/menus/rssMenuPlan?menuId=" + route.id + "&&dayOfWeek=" + (day.day + 1), par, new XMLResponseHandler(obs, route));
             }
         }
         return obsList;
@@ -123,8 +127,15 @@ public class UzhMensaCategory extends MensaCategory {
 
         @Override
         public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-            Log.e("fail", error.getMessage());
-            Log.e("response: ", new String(responseBody));
+            if(error == null || error.getMessage() == null) {
+                error.printStackTrace();
+                return;
+            }
+            Log.e("fail", error.getMessage() == null ? "null" : error.getMessage());
+            if(responseBody != null) {
+                Log.e("response: ", new String(responseBody));
+            }
+
             Log.e("id:", apiRoute.id+ "");
 
             error.printStackTrace();

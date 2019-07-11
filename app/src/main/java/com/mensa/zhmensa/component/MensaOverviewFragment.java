@@ -22,6 +22,11 @@ import com.mensa.zhmensa.services.TabManager;
 public class MensaOverviewFragment extends Fragment {
 
 
+    public void setMensaId(String shouldBeId) {
+        getArguments().putString(MENSA_ARGUMENT, shouldBeId);
+        setUpAdapters(shouldBeId);
+    }
+
     /**
      * Listener that gets triggered when a new day is selected
      */
@@ -63,6 +68,7 @@ public class MensaOverviewFragment extends Fragment {
     public void notifyDatasetChanged() {
         if (mAdapter == null) {
             Log.e("MensaOverview.ndc", "MAdapter was null for mensa id: " + getMensaId());
+            return;
         }
         mAdapter.notifyDataSetChanged();
     }
@@ -87,6 +93,7 @@ public class MensaOverviewFragment extends Fragment {
         Log.e("onresume", "on resume called in  " + (mensa == null ? "null" : mensa.getDisplayName()));
         if (viewpager != null)
             viewpager.setCurrentItem(MensaManager.SELECTED_DAY);
+        notifyDatasetChanged();
     }
 
     public void notifyDayChanged() {
@@ -96,6 +103,31 @@ public class MensaOverviewFragment extends Fragment {
     }
 
 
+    private void setUpAdapters(String mensaId) {
+        mensa = MensaManager.getMensaForId(mensaId);
+
+        if (mensa == null) {
+            Log.e("MensaOverViewFramgnet", "Mensa " + mensaId + " not found");
+            return;
+        }
+
+        MensaTab tab = TabManager.getTabForMensa(mensa);
+
+        Log.d("MensaOverviewFragment", "adding fragments id: " + mensaId);
+
+        mAdapter = new TabAdapter(getChildFragmentManager());
+
+
+        for (Mensa.Weekday day : Mensa.Weekday.values()) {
+            Log.d("adding", "adding day: " + day);
+            mAdapter.addFragment(tab.getFragmentForWeekday(day), Helper.getNameForDay(day));
+        }
+
+
+        viewpager.setAdapter(mAdapter);
+
+
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -114,30 +146,15 @@ public class MensaOverviewFragment extends Fragment {
             Log.e("MensaOverViewFramgnet", "Got empty arguments");
             return rootView;
         }
-        mensa = MensaManager.getMensaForId(mensaId);
 
-        if (mensa == null) {
-            Log.e("MensaOverViewFramgnet", "Mensa " + mensaId + " not found");
-            return rootView;
-        }
-
-        MensaTab tab = TabManager.getTabForMensa(mensa);
-
-        Log.d("MensaOverviewFragment", "adding fragments id: " + mensaId);
-
-        mAdapter = new TabAdapter(getChildFragmentManager());
-
-
-        for (Mensa.Weekday day : Mensa.Weekday.values()) {
-            Log.d("adding", "adding day: " + day);
-            mAdapter.addFragment(tab.getFragmentForWeekday(day), Helper.getNameForDay(day));
-        }
 
         viewpager = rootView.findViewById(R.id.main_viewpager_week);
-        viewpager.setAdapter(mAdapter);
-
         TabLayout tabLayout = rootView.findViewById(R.id.main_tablayout);
         tabLayout.setupWithViewPager(viewpager);
+
+
+        setUpAdapters(mensaId);
+
         viewpager.setCurrentItem(MensaManager.SELECTED_DAY);
 
         viewpager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.filters.MenuIdFilter;
 import com.mensa.zhmensa.models.EthMensaCategory;
@@ -33,6 +35,7 @@ import java.util.Set;
 public class MensaManager {
 
 
+    private static final String LAST_UPDATE_PREF = "last_update";
     public static int SELECTED_DAY = Helper.getCurrentDay();
     /**
      * Context used to get shared Preferences
@@ -81,7 +84,7 @@ public class MensaManager {
 
     };
     private static final MensaCategory[] categories = {new EthMensaCategory("ETH-Zentrum"), dummyHonggCat, new UzhMensaCategory("UZH-Zentrum"), dummyUzhIrchel};
-
+    private static Long lastUpdate = null;
 
 
     // ---------- Internal functions ---------------
@@ -112,13 +115,8 @@ public class MensaManager {
 
             // New loaded Menus
             List<IMenu> newMenus = mensa.getMenusForDayAndCategory(day, mealType);
-            /*if(!put(mensa)) {
-                IdToMensaMapping.get(mensa.getUniqueId()).setMenuForDayAndCategory(day, mealType, newMenus);
-            }*/
-            Log.d("addNewMensaItem", "Mensa: " + mensa.toString());
-            Mensa m =  getMensaForId(mensa.getUniqueId());
 
-            Log.d("addNewMensaItem-O",m == null ? "null" : m.toString());
+
             putAndUpdate(mensa, day, mealType, newMenus);
 
             // Check if any item is a favorite Menu. If yes, add it to the favorite Mensa-
@@ -167,17 +165,45 @@ public class MensaManager {
         activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
             .edit()
             .putStringSet(category.getDisplayName(), mensaJson)
-            .apply();
+                .apply();
+
+        if(category.lastUpdated() != null) {
+            activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putLong(category.getDisplayName() + LAST_UPDATE_PREF, category.lastUpdated())
+                    .apply();
+        }
 
     }
     //private static void
     private static void loadCachedMensaForCategory(MensaCategory category) {
+
+        Long lastUpdated = activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                .getLong(category.getDisplayName() + LAST_UPDATE_PREF, 0);
+
         Log.d("MensaManager.loadCache", "Loading cached Mensas for category: " + category.getDisplayName());
         Set<String> mensaJsons = activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
-                                                        .getStringSet(category.getDisplayName(), new HashSet<String>());
+                .getStringSet(category.getDisplayName(), new HashSet<String>());
+
         if(mensaJsons.isEmpty()){
             Log.d("MensaManager.loadCache", "Mensajson was empty");
         }
+
+        if(lastUpdated == null || lastUpdated == 0){
+            Log.d("MensaManager.loadCache", "last updated was empty for cat " + category.getDisplayName());
+            return;
+        }
+
+
+        if(category.lastUpdated() == null)
+            category.setLastUpdated(lastUpdated);
+
+        if(!Helper.isDataStillValid(lastUpdated)) {
+            Log.d("MensaManager.loadCache", "Data too old for category " + category.getDisplayName());
+            return;
+        }
+
+
 
         for (String mensaJson : mensaJsons) {
             Mensa mensa = Helper.getMensaFromJsonString(mensaJson);
@@ -420,7 +446,10 @@ public class MensaManager {
      * @return
      */
     public static List<IMenu> getMenusForIdWeekAndCat(String mensaId, Mensa.MenuCategory category, Mensa.Weekday weekday) {
-        return Helper.firstNonNull(IdToMensaMapping.get(mensaId), new Mensa("Dummy","Dummy")).getMenusForDayAndCategory(weekday, category);
+        Mensa storedMensa = IdToMensaMapping.get(mensaId);
+        if(storedMensa == null)
+            return Collections.emptyList();
+        return storedMensa.getMenusForDayAndCategory(weekday, category);
     }
 
     /**
@@ -448,9 +477,12 @@ public class MensaManager {
      *
      * @param category The category which mensas shoudl be loaded.
      */
-    public static void loadMensasForCategory(final MensaCategory category) {
+    public static void loadMensasForCategory(final MensaCategory category, boolean loadFromInternet) {
 
         loadCachedMensaForCategory(category);
+
+        if(!loadFromInternet)
+            return;
 
         for (final MensaListObservable observable : category.loadMensasFromAPI()) {
             observable.addObserver(new Observer() {
@@ -458,6 +490,7 @@ public class MensaManager {
                 @Override
                 public void update(Observable obs, Object o) {
                     Log.e("MensaManager-Observable", "Got Updates for loadMensaFromAPI()");
+                    category.setLastUpdated(Helper.getStartOfWeek().getMillis());
 
                     // Add every new mensa to the mensa mapping. This will notify all listeners and they will appear in the sidebar.
                     addNewMensaItem(observable.getNewItems(), category, observable.day, observable.mealType);
@@ -476,8 +509,26 @@ public class MensaManager {
         return favoriteMensa;
     }
 
+    @Nullable
     public static Mensa getMensaForId(String mensaId) {
         return IdToMensaMapping.get(mensaId);
+    }
+
+    public static void clearState() {
+        IdToMensaMapping.clear();
+    }
+
+    public static void clearCache() {
+        if(activityContext == null)
+            return;
+
+        for(MensaCategory cat : getMensaCategories()) {
+            activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE)
+                    .edit()
+                    .putStringSet(cat.getDisplayName(), new HashSet<String>())
+                    .apply();
+        }
+        clearState();
     }
 
 

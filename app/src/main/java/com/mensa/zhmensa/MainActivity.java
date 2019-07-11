@@ -19,6 +19,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
@@ -62,6 +63,8 @@ public class MainActivity extends AppCompatActivity
     // ------ End Navigation Drawer -----------------
 
     private Toolbar toolbar;
+    private NavigationExpandableListAdapter expandableListAdapter;
+    private Mensa selectedMensa;
 
     //public final static MensaOverviewFragment.WeekdayObservable WEEKDAY_SELECTION_OBSERVABLE = new MensaOverviewFragment.WeekdayObservable();
 
@@ -102,9 +105,11 @@ public class MainActivity extends AppCompatActivity
 
         viewPager = findViewById(R.id.OverviewViewPager);
 
-        reloadData();
+        reloadData(true);
 
         viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+
+        viewPager.setSaveEnabled(false);
 
         viewPager.setAdapter(viewPagerAdapter);
 
@@ -112,8 +117,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onPageSelected(int position) {
                 // Set title to current mensa name
-                Mensa mensa = MensaManager.getMensaForId(getMensaIdForPosition(position));
-                String title = mensa.getDisplayName();
+                selectedMensa = MensaManager.getMensaForId(getMensaIdForPosition(position));
+
+                if(selectedMensa == null) {
+                    Log.e("On page change listener", "Mensa was null");
+                    return;
+                }
+                String title = selectedMensa.getDisplayName();
 
                 getSupportActionBar().setTitle(title);
 
@@ -140,8 +150,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
     }
+
+
 
     @Override
     public void onNewMensaLoaded(List<Mensa> mensas) {
@@ -162,12 +173,17 @@ public class MainActivity extends AppCompatActivity
             if(!found){
                 Log.d("onnml", "Not found for mensa: "  + mensa.toString());
             }
-
-
-            if(viewPagerAdapter != null)
-                viewPagerAdapter.notifyDataSetChanged();
         }
 
+
+        if(viewPagerAdapter != null) {
+            viewPagerAdapter.syncMenuIds();
+
+            viewPagerAdapter.notifyDataSetChanged();
+            //viewPagerAdapter.notifyDataSetChanged();
+            //viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager());
+            //viewPager.setAdapter(viewPagerAdapter);
+        }
         populateExpandableList();
 
         selectMensa(getSelectedMensa());
@@ -177,10 +193,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMensaUpdated(Mensa mensa) {
         Log.d("MainActivity.omu", "Got update for Mensa: " + mensa.getDisplayName());
-        // Notify recycler view to reload cards for this mensa
-        viewPagerAdapter.notifyFragmentForIdChanged(mensa.getUniqueId());
 
         Mensa selectedMensa = getSelectedMensa();
+        Log.d("MainActivity.omu", "Got update for Mensa: " + mensa.getDisplayName());
+        // Notify recycler view to reload cards for this mensa
+        if(viewPagerAdapter != null)
+            viewPagerAdapter.notifyFragmentForIdChanged(mensa.getUniqueId());
+
+        Log.d("selm,ensa", selectedMensa == null ? "null" : selectedMensa.toString());
         if(selectedMensa != null && selectedMensa.getUniqueId().equals(mensa.getUniqueId())){
             selectMensa(selectedMensa);
         }
@@ -193,16 +213,44 @@ public class MainActivity extends AppCompatActivity
      */
     @Nullable
     private Mensa getSelectedMensa() {
-        NavigationMenuHeader header = headerList.get(selectedGroupNr);
-        if(childList.get(header) != null && childList.get(header).size() != 0) {
-            return childList.get(header).get(selectedMensaNr).mensa;
+        return selectedMensa;
+        /*
+
+        Log.d("getSelectedMensa", "nr: " + selectedGroupNr + " m " + selectedMensaNr);
+
+        if(headerList.size() <= selectedGroupNr || headerList.get(selectedGroupNr) == null) {
+
+            if(selectedGroupNr == 0 && selectedMensaNr == 0)
+                return null;
+
+            selectedMensaNr = 0;
+            selectedGroupNr = 0;
+            return getSelectedMensa();
         }
-        return null;
+
+
+        NavigationMenuHeader header = headerList.get(selectedGroupNr);
+
+        List<NavigationMenuChild> children = childList.get(header);
+
+        if (children != null) {
+            if (children.size() > selectedMensaNr) {
+                    return children.get(selectedMensaNr).mensa;
+            } else {
+                if(selectedGroupNr == 0 && selectedMensaNr == 0)
+                    return null;
+
+                selectedMensaNr = 0;
+                selectedGroupNr = 0;
+                return getSelectedMensa();
+            }
+        }
+        return null;*/
     }
 
 
-    public void reloadData() {
-        prepareMenuData();
+    public void reloadData(boolean loadFromInternet) {
+        prepareMenuData(loadFromInternet);
         populateExpandableList();
     }
 
@@ -231,8 +279,27 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        /* if (id == R.id.action_settings) {
+            //SettingsFragment f = new SettingsFragment();
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+
+        } else */if(id == R.id.action_reload) {
+
+            selectedMensaNr = 0;
+            selectedGroupNr = 0;
+            selectMensa(MensaManager.getFavoritesMensa());
+            MensaManager.clearCache();
+            viewPagerAdapter.clearCache();
+
+            reloadData(true);
+            /*for(NavigationMenuHeader header : headerList) {
+                if(head)
+            }
+            //childList.clear();
+            for (MensaCategory cat: MensaManager.getMensaCategories()) {
+                MensaManager.loadMensasForCategory(cat, true);
+            }*/
         }
 
         return super.onOptionsItemSelected(item);
@@ -243,19 +310,37 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+
+/*
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("on resume called--1", "on");
+        Log.d("adapter:",viewPagerAdapter == null ? "null" : "notnull");
+        Log.d("otheradapter",expandableListAdapter == null ? "null" : "notnull");
+        Log.d("size", childList.size() + " s");
+        for(Collection val : childList.values()) {
+            Log.d("size", val.size()+ " s");
+        }
+        populateExpandableList();
+        // reloadData(false);
+       // populateExpandableList();
+    }*/
+
     @Override
     protected void onPause() {
         super.onPause();
         Log.d("MainActivity.onDest", "Destroying activity. Saving Mensa list to shared preferences");
         // Store mensa to cache
         MensaManager.storeAllMensasToCache();
+        MensaManager.clearState();
 
     }
 
     /**
      * Loads all categories + mensa from factory and stores them in list/map
      */
-    private void prepareMenuData() {
+    private void prepareMenuData(boolean loadFromInternet) {
         NavigationFavoritesHeader fav = new NavigationFavoritesHeader();
 
         headerList.clear();
@@ -275,7 +360,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         for(MensaCategory category : MensaManager.getMensaCategories()) {
-            MensaManager.loadMensasForCategory(category);
+            MensaManager.loadMensasForCategory(category, loadFromInternet);
         }
     }
 
@@ -287,7 +372,7 @@ public class MainActivity extends AppCompatActivity
     private void populateExpandableList() {
         Log.d("tostr", childList.toString());
         // -------- Navigation Drawer -------------
-        NavigationExpandableListAdapter expandableListAdapter = new NavigationExpandableListAdapter(this, headerList, childList);
+        expandableListAdapter = new NavigationExpandableListAdapter(this, headerList, childList);
         expandableListView.setAdapter(expandableListAdapter);
 
         // Add click listener for favorite
@@ -332,8 +417,9 @@ public class MainActivity extends AppCompatActivity
             Log.d("selectMensa", "Mensa was null");
             return;
         }
+        selectedMensa = mensa;
 
-        Log.d("Select Mensa: ", "Mensa: " + mensa.getDisplayName());
+        Log.d("Select Mensa: ", "Mensa: " + mensa.toString());
 
         getSupportActionBar().setTitle(mensa.getDisplayName());
         int pos = getMensaPosForId(mensa.getUniqueId());
@@ -346,8 +432,17 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+    @Override
+    public void onRestart() {
+        super.onRestart();
+        Log.d("ON RESTART", "RESATR");
+        reloadData(false);
+    }
+
     private String getMensaIdForPosition(int position) {
         Log.d("MainActivity", "getMensaIdForPos: pos " +position);
+
         for(List<NavigationMenuChild> child: childList.values()) {
             if(child.size() <= position) {
                 position -= child.size();
@@ -389,7 +484,7 @@ public class MainActivity extends AppCompatActivity
             Log.d("ViewPagerAdapte.getitem", "get item called. pos: " + position);
             if(positionToFragment.get(position) == null){
 
-                Log.d("ViewPagerAdapte.getitem", "no cached item found");
+                Log.d("ViewPagerAdapte.getitem", "no cached item found going to get new item for id: " + getMensaIdForPosition(position) );
                 positionToFragment.put(position, MensaOverviewFragment.newInstance(getMensaIdForPosition(position)));
             }
 
@@ -401,7 +496,7 @@ public class MainActivity extends AppCompatActivity
             // Do stuff
             for(MensaOverviewFragment frag: positionToFragment.values()){
                 if(frag.getMensaId().equals(mensaId)){
-                    Log.d("MainActivity.notifyfrag","found mensa fragment going to notify changes");
+                    Log.d("MainActivity.notifyfrag","found mensa fragment going to notify changes for id: " + mensaId);
                     frag.notifyDatasetChanged();
                 }
             }
@@ -424,12 +519,41 @@ public class MainActivity extends AppCompatActivity
             for(MensaOverviewFragment f : positionToFragment.values())
                 f.notifyDayChanged();
         }
+
+        public void syncMenuIds() {
+            for (Integer key : positionToFragment.keySet()) {
+                MensaOverviewFragment frag = positionToFragment.get(key);
+                if(frag == null)
+                    continue;
+
+                String id = frag.getMensaId();
+                String shouldBeId = getMensaIdForPosition(key);
+
+                if(id != null && !id.equals(shouldBeId)){
+                    Log.d("MainACtivity.chmids", "Found wrong ids: " + id + " : " + shouldBeId);
+                    frag.setMensaId(shouldBeId);
+                    frag.notifyDatasetChanged();
+                }
+            }
+
+                //f.notifyDatasetChanged();
+           // positionToFragment.clear();
+
+        }
+
+        public void clearCache() {
+            positionToFragment.clear();
+            notifyDataSetChanged();
+        }
     }
 
 
-    public class ErrorMessageModel extends ViewModel {
+    public static class ErrorMessageModel extends ViewModel {
         private MutableLiveData<Pair<String,String>> errorMessage = new MutableLiveData<Pair<String,String>>();
 
+        public ErrorMessageModel() {
+
+        }
         public MutableLiveData<Pair<String,String>>  getMessage() {
             return errorMessage;
         }
