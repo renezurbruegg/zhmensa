@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.navigation;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.R;
@@ -13,7 +14,8 @@ public class NavigationFavoritesHeader extends NavigationMenuHeader{
 
 
     public NavigationFavoritesHeader() {
-        super(new MensaCategory("Favorites") {
+        super(new MensaCategory("Favorites", 0) {
+            @NonNull
             @Override
             public List<MensaListObservable> loadMensasFromAPI() {
                 return Collections.emptyList();
@@ -27,6 +29,7 @@ public class NavigationFavoritesHeader extends NavigationMenuHeader{
         }, false, -1);
     }
 
+    @NonNull
     public String getDisplayName() {
         return "Favorites";
     }

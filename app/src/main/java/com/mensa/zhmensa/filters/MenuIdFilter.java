@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.filters;
 
+import androidx.annotation.NonNull;
+
 import com.mensa.zhmensa.models.IMenu;
 
 /**
@@ -13,7 +15,7 @@ public class MenuIdFilter implements MenuFilter {
         this.menuId = menuId;
     }
     @Override
-    public boolean apply(IMenu menu) {
+    public boolean apply(@NonNull IMenu menu) {
         return menu.getId().equals(menuId);
     }
 }

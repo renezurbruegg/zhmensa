@@ -2,6 +2,8 @@ package com.mensa.zhmensa.models;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.mensa.zhmensa.R;
 
 import java.util.Collections;
@@ -19,12 +21,13 @@ public class FavoriteMensa extends Mensa {
     public FavoriteMensa(String displayName) {
         super(displayName, displayName);
 
-        setMensaCategory(new MensaCategory("Favorites") {
+        setMensaCategory(new MensaCategory("Favorites", 0) {
             @Override
             public Integer getCategoryIconId() {
                 return R.drawable.ic_favorite_black_24dp;
             }
 
+            @NonNull
             @Override
             public List<MensaListObservable> loadMensasFromAPI() {
                 return Collections.emptyList();
@@ -33,7 +36,7 @@ public class FavoriteMensa extends Mensa {
 
     }
 
-    public void removeMenuFromList(IMenu menu) {
+    public void removeMenuFromList(@NonNull IMenu menu) {
         for(Weekday day: Weekday.values()) {
             Map<MenuCategory,Set<IMenu>> mealTypeToMenu = meals.get(day);
 
@@ -74,7 +77,7 @@ public class FavoriteMensa extends Mensa {
         }
     }
 
-    public void addMenu(String mensaName, Weekday day, MenuCategory mealType, IMenu menu) {
+    public void addMenu(String mensaName, Weekday day, MenuCategory mealType, @NonNull IMenu menu) {
         addMenuForDayAndCategory(day, mealType, Collections.<IMenu>singletonList(new FavoriteMenu(mensaName, menu)));
     }
 }

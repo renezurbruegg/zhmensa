@@ -90,7 +90,7 @@ public class Menu implements IMenu{
        return MensaManager.isFavorite(getId());
     }
 
-    public void setAllergene(@Nullable String allergene) {
+    private void setAllergene(@Nullable String allergene) {
         this.allergene = allergene;
         if(this.allergene != null) {
             this.allergene = this.allergene.replaceAll(" *Allergene *:? *","");
@@ -107,6 +107,7 @@ public class Menu implements IMenu{
     }
 
 
+    @Nullable
     public String getSharableString() {
        return getName() +
                 "\n" +
@@ -120,6 +121,7 @@ public class Menu implements IMenu{
         return (allergene != null && !allergene.isEmpty() && !allergene.equals("null"));
     }
 
+    @Nullable
     @Override
     public String toString() {
         return getName();

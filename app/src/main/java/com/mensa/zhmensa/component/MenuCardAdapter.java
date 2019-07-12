@@ -6,13 +6,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
 import com.mensa.zhmensa.models.IMenu;
-import com.mensa.zhmensa.models.Menu;
+import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.List;
 
@@ -21,25 +22,25 @@ import java.util.List;
  * Adapter class that holds all menu views for a Mensa.
  * Is used inside the recycler view to display different menus.
  */
-public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
+class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
     private Context context;
-    private SortedList<IMenu> menus;
+    private final SortedList<IMenu> menus;
 
-    public MenuCardAdapter(List<IMenu> menus) {
-        this.menus = new SortedList<IMenu>(IMenu.class, new ComparableSortedListAdapterCallback(this));
+    public MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId) {
+        this.menus = new SortedList<>(IMenu.class, new ComparableSortedListAdapterCallback(this));
 
         if (menus != null) {
             this.menus.addAll(menus);
         }
 
         if (this.menus.size() == 0) {
-            this.menus.add(new Menu("", "", "Momentan kein Menü verfügbar", "", "", "dummy"));
+            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId));
         }
     }
 
-    public void setItems(List<IMenu> items ){
+    public void setItems(@NonNull List<IMenu> items ){
         this.menus.clear();
         this.menus.addAll(items);
     }
@@ -50,8 +51,7 @@ public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     public MenuViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.menu_card, parent, false);
-        MenuViewHolder viewHolder = new MenuViewHolder(view);
-        return viewHolder;
+        return new MenuViewHolder(view);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package com.mensa.zhmensa.services;
 
 
+import androidx.annotation.NonNull;
+
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -8,7 +10,8 @@ import com.loopj.android.http.RequestParams;
 public class HttpUtils {
   //  private static final String BASE_URL = "http://api.twitter.com/1/";
 
-    private static AsyncHttpClient client = new AsyncHttpClient();
+    @NonNull
+    private static final AsyncHttpClient client = new AsyncHttpClient();
 
 /*    public static void get(String url, RequestParams params, AsyncHttpResponseHandler responseHandler) {
         client.get(getAbsoluteUrl(url), params, responseHandler);

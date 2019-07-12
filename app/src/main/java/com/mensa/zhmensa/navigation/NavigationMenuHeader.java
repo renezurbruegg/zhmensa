@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.navigation;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.models.MensaCategory;
@@ -8,9 +9,9 @@ import com.mensa.zhmensa.services.Helper;
 public class NavigationMenuHeader implements  Comparable<NavigationMenuHeader>{
 
 
-    public MensaCategory category;
-    private boolean hasChildren;
-    private Integer position;
+    public final MensaCategory category;
+    private final boolean hasChildren;
+    private final Integer position;
 
     public NavigationMenuHeader(MensaCategory category, boolean hasChildren, int position) {
         this.category = category;
@@ -18,6 +19,7 @@ public class NavigationMenuHeader implements  Comparable<NavigationMenuHeader>{
         this.position = position;
     }
 
+    @NonNull
     public String getDisplayName() {
         return category.getDisplayName();
     }
@@ -26,6 +28,7 @@ public class NavigationMenuHeader implements  Comparable<NavigationMenuHeader>{
         return hasChildren;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "Cat: " + (category == null ? "null" : category.getDisplayName())  + " - hasChildren: " + hasChildren;

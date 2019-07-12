@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.services.Helper;
+import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,11 +25,13 @@ import static com.mensa.zhmensa.services.Helper.firstNonNull;
  */
 public class Mensa implements Comparable<Mensa> {
 
-    private String displayName;
+    @Nullable
+    private final String displayName;
 
     @NonNull
     private final String mensaId;
 
+    @NonNull
     final Map<Weekday, Map<MenuCategory, Set<IMenu>>> meals;
     private MensaCategory category;
 
@@ -52,7 +55,7 @@ public class Mensa implements Comparable<Mensa> {
         return this.category;
     }
 
-    public void setMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
+    public void setMenuForDayAndCategory(Weekday weekday, MenuCategory category, @NonNull List<IMenu> menus) {
         Log.d("Adding menus " + getDisplayName(), "cat " + category + " menus: " + menus) ;
 
         Map<MenuCategory,Set<IMenu>> map = firstNonNull(meals.get(weekday), new HashMap<MenuCategory, Set<IMenu>>());
@@ -62,7 +65,7 @@ public class Mensa implements Comparable<Mensa> {
 
         meals.put(weekday,map);
     }
-    public void addMenuForDayAndCategory(Weekday weekday, MenuCategory category, List<IMenu> menus) {
+    public void addMenuForDayAndCategory(Weekday weekday, MenuCategory category, @NonNull List<IMenu> menus) {
         Log.d("Adding menus " + getDisplayName(), "cat " + category + " menus: " + menus) ;
 
         Map<MenuCategory,Set<IMenu>> map = firstNonNull(meals.get(weekday), new HashMap<MenuCategory, Set<IMenu>>());
@@ -84,6 +87,7 @@ public class Mensa implements Comparable<Mensa> {
      *
      * @return a list with all menus currently server by this mensa. Returns never null, but empty list if nothing is found
      */
+    @NonNull
     public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category) {
         Map<MenuCategory, Set<IMenu>> map = firstNonNull(meals.get(weekday), Collections.<MenuCategory, Set<IMenu>>emptyMap());
 
@@ -98,6 +102,7 @@ public class Mensa implements Comparable<Mensa> {
         return Helper.firstNonNull(displayName, "null");
     }
 
+    @NonNull
     public String getUniqueId() {
         return mensaId;
     }
@@ -108,6 +113,28 @@ public class Mensa implements Comparable<Mensa> {
             return 1;
 
         return getDisplayName().toLowerCase().compareTo(m.getDisplayName().toLowerCase());
+    }
+
+    @NonNull
+    public String getAsSharableString() {
+
+        String date = Helper.getHumanReadableDay(MensaManager.SELECTED_DAY);
+        StringBuilder sb = new StringBuilder();
+
+        Weekday day = Weekday.of(MensaManager.SELECTED_DAY);
+        List<IMenu> menus = getMenusForDayAndCategory(day, MensaManager.MEAL_TYPE);
+        sb.append(getDisplayName()).append(" - ").append(date).append("\n");
+
+        for(IMenu menu : menus) {
+            sb.append(menu.getSharableString());
+            sb.append("\n \n");
+        }
+
+        return sb.toString();
+    }
+
+    public void clearMenus() {
+        meals.clear();
     }
 
 
@@ -123,14 +150,28 @@ public class Mensa implements Comparable<Mensa> {
         Weekday(int day){
             this.day = day;
         }
+
+        static Weekday of(int day) {
+
+           for(Weekday knownDay: Weekday.values())
+           {
+               if(knownDay.day == day)
+                   return knownDay;
+           }
+
+           return values()[0];
+        }
+
     }
 
+    @NonNull
     public String toString() {
         return "Name: " + getDisplayName() + " Id: " + getUniqueId() + " \n " + meals.toString();
     }
 
 
-    public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category, MenuFilter filter) {
+    @NonNull
+    public List<IMenu> getMenusForDayAndCategory(Weekday weekday, MenuCategory category, @NonNull MenuFilter filter) {
         Map<MenuCategory, Set<IMenu>> map = firstNonNull(meals.get(weekday), Collections.<MenuCategory, Set<IMenu>>emptyMap());
 
         List<IMenu> returnList = new ArrayList<>();

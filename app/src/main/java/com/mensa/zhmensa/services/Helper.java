@@ -24,6 +24,7 @@ import org.joda.time.format.DateTimeFormatter;
 
 import java.lang.reflect.Type;
 
+@SuppressWarnings("unused")
 public class Helper {
 
 
@@ -93,8 +94,7 @@ public class Helper {
      * @return
      */
     public static String getDay(int offset) {
-        return getDay(getStartOfWeek().plusDays(offset));
-
+        return getDay(getStartOfWeek().plusDays(offset), DateTimeFormat.forPattern("yyyy-MM-dd"));
     }
 
     /**
@@ -102,10 +102,14 @@ public class Helper {
      * @param offset
      * @return
      */
-    private static String getDay(DateTime date) {
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private static String getDay(DateTime date, DateTimeFormatter dtfOut) {
         return dtfOut.print(date);
     }
+
+    public static String getHumanReadableDay(int selectedDay) {
+        return getDay(getStartOfWeek().plusDays(selectedDay), DateTimeFormat.forPattern("dd MMMM"));
+    }
+
 
 
 
@@ -156,10 +160,16 @@ public class Helper {
 
     public static boolean isDataStillValid(Long lastUpdated) {
             Log.d("lastupdatecheck", "Last updated: " + new DateTime(lastUpdated));
-        return getDay(0).equals(getDay(new DateTime(lastUpdated)));
+        return getDay(0).equals(getDay(new DateTime(lastUpdated), DateTimeFormat.forPattern("yyyy-MM-dd")));
+    }
+
+    public static String removeHtmlTags(@NonNull  String str) {
+        return str.replaceAll("<[^>]+>","");
     }
 
 
+    @SuppressWarnings("SameReturnValue")
+    @NonNull
     public String getLanguageCode() {
         return "de";
     }
@@ -167,6 +177,7 @@ public class Helper {
 
 
     static final class InterfaceAdapter<T> implements JsonSerializer<T>, JsonDeserializer<T> {
+        @NonNull
         public JsonElement serialize(T object, Type interfaceType, JsonSerializationContext context) {
             final JsonObject wrapper = new JsonObject();
             wrapper.addProperty("type", object.getClass().getName());

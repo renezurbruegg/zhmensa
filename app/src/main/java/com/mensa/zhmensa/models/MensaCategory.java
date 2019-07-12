@@ -1,8 +1,6 @@
 package com.mensa.zhmensa.models;
 
 
-import android.graphics.drawable.Drawable;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -12,7 +10,6 @@ import com.mensa.zhmensa.services.Helper;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Observable;
 
 
 /**
@@ -26,16 +23,22 @@ public abstract class MensaCategory {
      * Name that is displayed inside the drawer
      */
     @NonNull
-    private String displayName;
+    private final String displayName;
     private Long lastUpdated;
+    private int position;
 
-    public MensaCategory(String displayName) {
-        this(displayName, Collections.<String>emptyList());
+    public MensaCategory(String displayName, int position) {
+        this(displayName, Collections.<String>emptyList(), position);
     }
 
-    public MensaCategory(String catName, List<String> mensaIds) {
+    public MensaCategory(@Nullable String catName, @NonNull List<String> mensaIds, int position) {
         this.displayName = Helper.firstNonNull(catName,"");
         knownMensas = new ArrayList<>(mensaIds);
+        this.position = position;
+    }
+
+    public int getPosition() {
+        return position;
     }
 
     @NonNull
@@ -48,6 +51,7 @@ public abstract class MensaCategory {
         return R.drawable.ic_eth_2;
     }
 
+    @NonNull
     public abstract List<MensaListObservable> loadMensasFromAPI();
 
     public boolean containsMensa(@Nullable Mensa mensa) {
@@ -63,6 +67,13 @@ public abstract class MensaCategory {
             return getDisplayName().equals(((MensaCategory)obj).getDisplayName());
         return false;
     }
+
+
+    @Override
+    public int hashCode() {
+        return getDisplayName().hashCode();
+    }
+
     @Nullable
     public Long lastUpdated() {
         return lastUpdated;
@@ -71,4 +82,5 @@ public abstract class MensaCategory {
     public void setLastUpdated(Long lastUpdated) {
         this.lastUpdated = lastUpdated;
     }
+
 }
