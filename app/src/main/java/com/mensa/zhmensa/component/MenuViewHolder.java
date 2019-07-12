@@ -2,7 +2,6 @@ package com.mensa.zhmensa.component;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.Image;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.models.IMenu;
-import com.mensa.zhmensa.models.Menu;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -32,7 +30,7 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
      */
-    static void bind(MenuViewHolder viewHolder, final IMenu menu, final Context ctx) {
+    static void bind(MenuViewHolder viewHolder, final IMenu menu, @NonNull final Context ctx) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
@@ -52,6 +50,11 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
             showMoreBtn.setVisibility(View.INVISIBLE);
             favBtn.setVisibility(View.INVISIBLE);
             return;
+        } else {
+            ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setGravity(View.TEXT_ALIGNMENT_TEXT_START);
+            shareBtn.setVisibility(View.VISIBLE);
+            showMoreBtn.setVisibility(View.VISIBLE);
+            favBtn.setVisibility(View.VISIBLE);
         }
 
 

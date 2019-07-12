@@ -21,6 +21,11 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!-- <include layout="@layout/content_main" /> -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/refresh_layout"
+        android:orientation="vertical">
     <com.mensa.zhmensa.component.InterceptAllVerticalSwipesViewPager
         android:id="@+id/OverviewViewPager"
         android:layout_width="match_parent"
@@ -29,5 +34,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

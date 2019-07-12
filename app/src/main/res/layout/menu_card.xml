@@ -8,7 +8,6 @@
 
     <!-- A CardView that contains a TextView -->
     <com.google.android.material.card.MaterialCardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         style="@style/CardView.Light"
         android:id="@+id/card_view"
         android:layout_gravity="center"

@@ -24,7 +24,9 @@ public class MensaOverviewFragment extends Fragment {
 
     public void setMensaId(String shouldBeId) {
         getArguments().putString(MENSA_ARGUMENT, shouldBeId);
-        setUpAdapters(shouldBeId);
+        if(isAdded())
+            setUpAdapters(shouldBeId);
+
     }
 
     /**
@@ -74,7 +76,7 @@ public class MensaOverviewFragment extends Fragment {
     }
 
 
-    public static MensaOverviewFragment newInstance(String mensaId) {
+    public static MensaOverviewFragment newInstance(@Nullable String mensaId) {
         Log.d("movf", "Creating frag instance for id: " + ((mensaId == null) ? "null" : mensaId));
         if (mensaId == null)
             return null;
@@ -98,8 +100,10 @@ public class MensaOverviewFragment extends Fragment {
 
     public void notifyDayChanged() {
         Log.d("notifyDayChanged", "mensa: " + (mensa == null ? "null" : mensa.getDisplayName()) + " day: " + MensaManager.SELECTED_DAY);
-        if (viewpager != null)
+        if (viewpager != null) {
             viewpager.setCurrentItem(MensaManager.SELECTED_DAY);
+            viewpager.getAdapter().notifyDataSetChanged();
+        }
     }
 
 

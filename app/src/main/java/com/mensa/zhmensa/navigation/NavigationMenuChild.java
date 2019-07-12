@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.navigation;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.models.Mensa;
@@ -7,12 +8,13 @@ import com.mensa.zhmensa.models.Mensa;
 public class NavigationMenuChild implements  Comparable<NavigationMenuChild>{
 
 
-    public Mensa mensa;
+    public final Mensa mensa;
 
     public NavigationMenuChild(Mensa mensa) {
         this.mensa = mensa;
     }
 
+    @NonNull
     public String getDisplayName() {
         return mensa.getDisplayName();
     }

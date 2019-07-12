@@ -2,11 +2,12 @@ package com.mensa.zhmensa.component;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Scroller;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.viewpager.widget.ViewPager;
 
 import java.lang.reflect.Field;
@@ -21,15 +22,17 @@ public class InterceptAllVerticalSwipesViewPager extends ViewPager {
      */
     private static final int MIN_DRAG_VALUE = 20;
 
+    @Nullable
     private Float lastY = null;
+    @Nullable
     private Float lastX = null;
 
-    public InterceptAllVerticalSwipesViewPager(Context context) {
+    public InterceptAllVerticalSwipesViewPager(@NonNull Context context) {
         super(context);
         setMyScroller();
     }
 
-    public InterceptAllVerticalSwipesViewPager(Context context, AttributeSet attrs) {
+    public InterceptAllVerticalSwipesViewPager(@NonNull Context context, AttributeSet attrs) {
         super(context, attrs);
         setMyScroller();
     }
@@ -41,7 +44,7 @@ public class InterceptAllVerticalSwipesViewPager extends ViewPager {
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
+    public boolean onInterceptTouchEvent(@NonNull MotionEvent event) {
         // really ugly fix to let viewpager swipe not get intercepted by recycler view.
         // Returns always true if motion event swipes vertically
         // Thus NO CHILD VIEW WILL EVER GET TRIGGERED ON VERTICAL SWIPE EVENTS!
@@ -81,7 +84,7 @@ public class InterceptAllVerticalSwipesViewPager extends ViewPager {
         }
     }
 
-    public class MyScroller extends Scroller {
+    class MyScroller extends Scroller {
         MyScroller(Context context) {
             super(context, new DecelerateInterpolator());
         }

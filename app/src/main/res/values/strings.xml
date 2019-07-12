@@ -14,4 +14,6 @@
     <string name="menu_share">Share</string>
     <string name="menu_send">Send</string>
     <string name="action_reload">Reload</string>
+    <string name="action_share_mensa">Teilen</string>
+    <string name="mensa_zurich_title">Mensa Zürich</string>
 </resources>

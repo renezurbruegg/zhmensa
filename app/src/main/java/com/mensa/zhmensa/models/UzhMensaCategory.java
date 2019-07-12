@@ -2,6 +2,7 @@ package com.mensa.zhmensa.models;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.loopj.android.http.AsyncHttpResponseHandler;
@@ -26,7 +27,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import cz.msebera.android.httpclient.Header;
-import cz.msebera.android.httpclient.client.params.ClientPNames;
 
 public class UzhMensaCategory extends MensaCategory {
 
@@ -55,15 +55,16 @@ public class UzhMensaCategory extends MensaCategory {
      * "UZH Irchel (abend)": 256
      */
 
-    public UzhMensaCategory(String displayName) {
-        super(displayName);
+    public UzhMensaCategory(String displayName, int pos) {
+        super(displayName, pos);
     }
 
-    public UzhMensaCategory(String displayName, List<String> knownMensaIds) {
-        super(displayName, knownMensaIds);
+    public UzhMensaCategory(String displayName, @NonNull List<String> knownMensaIds, int pos) {
+        super(displayName, knownMensaIds, pos);
     }
 
 
+    @NonNull
     @Override
     public List<MensaListObservable> loadMensasFromAPI() {
         List<MensaListObservable> obsList = new ArrayList<>();
@@ -84,9 +85,9 @@ public class UzhMensaCategory extends MensaCategory {
 
 
     private static class MensaApiRoute {
-        public int id;
-        public String name;
-        Mensa.MenuCategory mealType;
+        final int id;
+        final String name;
+        final Mensa.MenuCategory mealType;
 
         MensaApiRoute(int id, String name, Mensa.MenuCategory mealType) {
             this.mealType = mealType;
@@ -105,7 +106,7 @@ public class UzhMensaCategory extends MensaCategory {
         }
 
         @Override
-        public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+        public void onSuccess(int statusCode, Header[] headers, @NonNull byte[] responseBody) {
        //     Log.e("reposne", new String(responseBody));
             try {
                 Mensa m = parseXML(apiRoute.name, responseBody, observable.day, observable.mealType);
@@ -126,7 +127,7 @@ public class UzhMensaCategory extends MensaCategory {
         }
 
         @Override
-        public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+        public void onFailure(int statusCode, Header[] headers, @Nullable byte[] responseBody, @Nullable Throwable error) {
             if(error == null || error.getMessage() == null) {
                 error.printStackTrace();
                 return;
@@ -142,6 +143,7 @@ public class UzhMensaCategory extends MensaCategory {
         }
 
 
+        @NonNull
         private Mensa parseXML(String name, byte[] xmlFile, Mensa.Weekday day, Mensa.MenuCategory mealType) throws  IOException, SAXException, ParserConfigurationException {
 
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -175,13 +177,14 @@ public class UzhMensaCategory extends MensaCategory {
 
             return retString.toString();
         }
-        private String trimString(String stringToTrim) {
+        private String trimString(@Nullable String stringToTrim) {
             if(stringToTrim == null) {
                 return "";
             }
             return stringToTrim.trim();
         }
 
+        @NonNull
         private List<IMenu> getMensaFromDivNode(String mensaName, Mensa.MenuCategory mealType, Node divNode) {
             List<IMenu> menuList = new ArrayList<>();
 

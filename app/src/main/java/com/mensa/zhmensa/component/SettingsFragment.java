@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.mensa.zhmensa.R;
@@ -35,7 +36,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @NonNull String key)
     {
         Log.d("chhnged", "key: "+ key);
         if (key.equals("setting_title_font_color"))

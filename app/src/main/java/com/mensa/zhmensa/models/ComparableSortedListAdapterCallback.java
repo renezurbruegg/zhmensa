@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.models;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
@@ -16,7 +18,7 @@ public class ComparableSortedListAdapterCallback<T extends  Comparable> extends 
     }
 
     @Override
-    public int compare(Comparable o1, Comparable o2) {
+    public int compare(@Nullable Comparable o1, @Nullable Comparable o2) {
         if(o1 == null || o2 == null)
             return -1;
 
@@ -29,12 +31,12 @@ public class ComparableSortedListAdapterCallback<T extends  Comparable> extends 
     }
 
     @Override
-    public boolean areContentsTheSame(Comparable oldItem, Comparable newItem) {
+    public boolean areContentsTheSame(@NonNull Comparable oldItem, Comparable newItem) {
         return oldItem.equals(newItem);
     }
 
     @Override
-    public boolean areItemsTheSame(Comparable item1, Comparable item2) {
+    public boolean areItemsTheSame(@NonNull Comparable item1, Comparable item2) {
         return item1.equals(item2);
     }
 
