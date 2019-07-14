@@ -76,7 +76,7 @@ public class MensaManager {
 
     private static final List<OnMensaLoadedListener> listeners = new ArrayList<>();
 
-    private static final MensaCategory dummyHonggCat = new EthMensaCategory("ETH-Hönggerberg", Arrays.asList("FUSION coffee", "FUSION meal", "Rice Up!", "food market - green day", "food market - grill bbQ", "food market - plaza pasta", "BELLAVISTA", "Food market - pizza pasta"), 2) {
+    private static final MensaCategory dummyHonggCat = new EthMensaCategory("ETH-Hönggerberg", Arrays.asList("FUSION coffee", "FUSION meal", "Rice Up!", "food market - green day", "food market - grill bbQ", "food market - pizza pasta", "BELLAVISTA", "Food market - pizza pasta"), 2) {
         @NonNull
         @Override
         public List<MensaListObservable> loadMensasFromAPI() {

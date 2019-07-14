@@ -116,13 +116,12 @@ public class Mensa implements Comparable<Mensa> {
     }
 
     @NonNull
-    public String getAsSharableString() {
+    public String getAsSharableString(@NonNull  Weekday day, @NonNull MenuCategory mealType) {
 
-        String date = Helper.getHumanReadableDay(MensaManager.SELECTED_DAY);
+        String date = Helper.getHumanReadableDay(day.day);
         StringBuilder sb = new StringBuilder();
 
-        Weekday day = Weekday.of(MensaManager.SELECTED_DAY);
-        List<IMenu> menus = getMenusForDayAndCategory(day, MensaManager.MEAL_TYPE);
+        List<IMenu> menus = getMenusForDayAndCategory(day, mealType);
         sb.append(getDisplayName()).append(" - ").append(date).append("\n");
 
         for(IMenu menu : menus) {
@@ -151,7 +150,7 @@ public class Mensa implements Comparable<Mensa> {
             this.day = day;
         }
 
-        static Weekday of(int day) {
+        public static Weekday of(int day) {
 
            for(Weekday knownDay: Weekday.values())
            {

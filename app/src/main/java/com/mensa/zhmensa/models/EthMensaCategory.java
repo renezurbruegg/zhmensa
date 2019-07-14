@@ -24,6 +24,7 @@ import cz.msebera.android.httpclient.Header;
 public class EthMensaCategory extends MensaCategory {
      // e.g. https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/2019-07-05/lunch
     private static final String apiRoute = "https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/";
+    private static final String[] EXPECTED_MENSA_NAMES = {"Food&lab", "Foodtrailer ETZ", "food market - pizza pasta", "Polysnack"};
 
     public EthMensaCategory(@NonNull String displayName, int pos) {
         super(displayName, pos);
@@ -93,18 +94,28 @@ public class EthMensaCategory extends MensaCategory {
         return menus;
     }
 
+
     @NonNull
     private static List<Mensa> convertJsonResponseToList(JSONArray array, Mensa.Weekday day, Mensa.MenuCategory menuCategory) {
         List<Mensa> mensaList = new ArrayList<>();
+        List<String> mensaNames = new ArrayList<>();
+
         for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject obj = (JSONObject) array.get(i);
                 String name = obj.getString("mensa");
+                mensaNames.add(name);
                 Mensa mensa = new Mensa(name, name);
                 mensa.setMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(name, menuCategory,  obj.getJSONArray("meals")));
                 mensaList.add(mensa);
             } catch (JSONException e) {
                 Log.e("Error", (e == null ? "null" : e.getMessage() ));
+            }
+        }
+
+        for(String expectedName : EXPECTED_MENSA_NAMES) {
+            if(!mensaNames.contains(expectedName)) {
+                mensaList.add(new Mensa(expectedName, expectedName));
             }
         }
         return mensaList;

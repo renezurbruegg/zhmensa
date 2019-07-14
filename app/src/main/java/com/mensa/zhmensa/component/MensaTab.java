@@ -173,6 +173,14 @@ public class MensaTab {
             adapter.notifyDataSetChanged();
 
         }
+
+        protected Mensa.MenuCategory getSelectedMealType() {
+            Log.d("MensaTab.getSelMT", "get selected meal type. current item : " + (vp == null ? "null" : vp.getCurrentItem()));
+            if(vp != null) {
+                return vp.getCurrentItem() == 0 ? Mensa.MenuCategory.LUNCH : Mensa.MenuCategory.DINNER;
+            }
+            return null;
+        }
     }
 
     /**

@@ -29,6 +29,21 @@ public class MensaOverviewFragment extends Fragment {
 
     }
 
+    public Mensa.MenuCategory getSelectedMealType() {
+        if(viewpager == null)
+            return null;
+        int selectedItem = viewpager.getCurrentItem();
+        Log.d("MensaOverviewFrag", "Selected weekday is : " + selectedItem);
+
+        if(mAdapter != null) {
+           Fragment frag =  mAdapter.getItem(selectedItem);
+           if(frag instanceof MensaTab.MensaWeekdayTabFragment) {
+               return ((MensaTab.MensaWeekdayTabFragment ) frag).getSelectedMealType();
+           }
+        }
+        return null;
+    }
+
     /**
      * Listener that gets triggered when a new day is selected
      */

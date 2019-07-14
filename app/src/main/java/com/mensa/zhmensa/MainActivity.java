@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity
 
         viewPager.setSaveEnabled(false);
 
+        final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
 
         viewPager.setAdapter(viewPagerAdapter);
 
@@ -170,9 +171,15 @@ public class MainActivity extends AppCompatActivity
                 });
             }
 
+            @Override
+            public void onPageScrollStateChanged( int state ) {
+                if (swipeView != null) {
+                    swipeView.setEnabled(state == ViewPager.SCROLL_STATE_IDLE);
+                }
+            }
+
         });
 
-        final SwipeRefreshLayout swipeView = (SwipeRefreshLayout) findViewById(R.id.refresh_layout);
         int padding = (int) (50 * getResources().getDisplayMetrics().density);
         swipeView.setProgressViewOffset(true, padding, (int) (padding * 1.5));
         swipeView.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -342,8 +349,10 @@ public class MainActivity extends AppCompatActivity
                 // ShareActionProvider shareActionProvider = (ShareActionProvider) item.getActionProvider();
                 Intent i = new Intent(android.content.Intent.ACTION_SEND);
                 i.setType("text/plain");
-                if(selectedMensa != null)
-                    i.putExtra(android.content.Intent.EXTRA_TEXT, selectedMensa.getAsSharableString());
+                if(selectedMensa != null) {
+                    Mensa.Weekday day = Mensa.Weekday.of(MensaManager.SELECTED_DAY);
+                    i.putExtra(android.content.Intent.EXTRA_TEXT, selectedMensa.getAsSharableString(day, Helper.firstNonNull(viewPagerAdapter.getSelectedMealType(selectedMensa.getUniqueId()), MensaManager.MEAL_TYPE)));
+                }
                 startActivity(Intent.createChooser(i, "Share"));
             }
 
@@ -571,6 +580,17 @@ public class MainActivity extends AppCompatActivity
                 }
             }
            notifyDataSetChanged();
+        }
+
+        @Nullable
+        public Mensa.MenuCategory getSelectedMealType(String mensaId) {
+
+            for(MensaOverviewFragment frag: positionToFragment.values()){
+                if(frag.getMensaId().equals(mensaId)){
+                    return frag.getSelectedMealType();
+                }
+            }
+            return null;
         }
 
         /*

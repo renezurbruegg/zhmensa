@@ -155,7 +155,11 @@ public class Helper {
      * @return 0 for monday, 4 for friday...
      */
     static int getCurrentDay() {
-        return Math.min(new DateTime(System.currentTimeMillis()).getDayOfWeek() , DateTimeConstants.FRIDAY) - DateTimeConstants.MONDAY;
+        int currentDay = new DateTime(System.currentTimeMillis()).getDayOfWeek();
+        if(currentDay > DateTimeConstants.FRIDAY)
+            return 0;
+
+        return currentDay - DateTimeConstants.MONDAY;
     }
 
     public static boolean isDataStillValid(Long lastUpdated) {

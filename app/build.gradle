@@ -7,8 +7,8 @@ android {
         applicationId "com.mensa.zhmensa"
         minSdkVersion 17
         targetSdkVersion 29
-        versionCode 9
-        versionName "0.0.9"
+        versionCode 10
+        versionName "1.1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
