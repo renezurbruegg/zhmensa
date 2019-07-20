@@ -1,5 +1,7 @@
 package com.mensa.zhmensa.models;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -21,7 +23,7 @@ public interface IMenu extends Comparable<IMenu> {
     String getId();
 
     @Nullable
-    String getAllergene();
+    String getAllergene(Context ctx);
 
     boolean isFavorite();
 
@@ -34,4 +36,5 @@ public interface IMenu extends Comparable<IMenu> {
     String getSharableString();
 
     boolean hasAllergene();
+
 }

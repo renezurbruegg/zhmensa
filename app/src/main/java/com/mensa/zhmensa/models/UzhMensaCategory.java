@@ -20,6 +20,7 @@ import org.xml.sax.SAXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -28,6 +29,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import cz.msebera.android.httpclient.Header;
 
+
+@SuppressWarnings("HardCodedStringLiteral")
 public class UzhMensaCategory extends MensaCategory {
 
     private static final MensaApiRoute[] ROUTES = {
@@ -56,7 +59,7 @@ public class UzhMensaCategory extends MensaCategory {
      */
 
     public UzhMensaCategory(String displayName, int pos) {
-        super(displayName, pos);
+        super(displayName, Arrays.asList("Rämi 59(vegan)", "Tierspital", "Untere Mensa A", "Lichthof"), pos);
     }
 
     public UzhMensaCategory(String displayName, @NonNull List<String> knownMensaIds, int pos) {
@@ -76,7 +79,9 @@ public class UzhMensaCategory extends MensaCategory {
                 RequestParams par = new RequestParams();
             //    par.ci
               //  par.put(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
-                HttpUtils.getByUrl("http://zfv.ch/de/menus/rssMenuPlan?menuId=" + route.id + "&&dayOfWeek=" + (day.day + 1), par, new XMLResponseHandler(obs, route));
+                final String apiUrl = "https://zfv.ch/" + Helper.getLanguageCode() + "/menus/rssMenuPlan?type=uzh2&menuId=" + route.id + "&dayOfWeek=" + (day.day + 1);
+                Log.d("UZHCategory loadMFAPI", "Loading UZH Mensas. Calling url: " + apiUrl);
+                HttpUtils.getByUrl(apiUrl, par, new XMLResponseHandler(obs, route));
             }
         }
         return obsList;
@@ -146,20 +151,59 @@ public class UzhMensaCategory extends MensaCategory {
         @NonNull
         private Mensa parseXML(String name, byte[] xmlFile, Mensa.Weekday day, Mensa.MenuCategory mealType) throws  IOException, SAXException, ParserConfigurationException {
 
+
+            String response = new String(xmlFile);
+            String resp = response.replaceAll("> +",">").replaceAll(" +<", "<").replace("\n","");
+
+            Log.d("UzhMensaCat.parseXML", "Got ans: " + resp)   ;
+
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(new ByteArrayInputStream(xmlFile));
+            Document doc = dBuilder.parse(new ByteArrayInputStream(resp.getBytes()));
             Element element=doc.getDocumentElement();
             element.normalize();
+
+
+
             NodeList nList = doc.getElementsByTagName("summary");
             Node summaryNode = nList.item(0);
 
+
+            Log.d("node", summaryNode.toString());
+
+
             for (int i = 0; i < summaryNode.getChildNodes().getLength(); i++) {
+
                 Node n = summaryNode.getChildNodes().item(i);
+                if(n == null)
+                    continue;
+
+                Log.d("UzhMensaCat.parseXML", "Got Node: " + n.getNodeValue());
+
                 if(n.getNodeName().equals("div")) {
                     // Found a new Mensa. Mensa are always in first div element
                     Mensa m = new Mensa(name, name);
-                    m.setMenuForDayAndCategory(day,mealType,getMensaFromDivNode(name, mealType, n));
+
+                    try {
+                        m.setMenuForDayAndCategory(day, mealType, getMensaFromDivNode(name, mealType, n));
+                    } catch (MensaClosedException e) {
+                        m.setClosed(true);
+                    }
+
+                    NodeList date = doc.getElementsByTagName("title");
+
+                    if(date != null && date.getLength() > 0 && date.item(0).getFirstChild() != null) {
+
+                        String dateString = date.item(0).getFirstChild().getNodeValue();
+
+                        String dayString = Helper.getDayForPattern(day.day, "dd.MM.YYYY");
+
+                        if(!dateString.contains(dayString)) {
+                            Mensa m2 =  new Mensa(name, name);
+                            m2.setClosed(m.isClosed());
+                            return m2;
+                        }
+                    }
                     return m;
                 }
             }
@@ -181,37 +225,74 @@ public class UzhMensaCategory extends MensaCategory {
             if(stringToTrim == null) {
                 return "";
             }
-            return stringToTrim.trim();
+            return stringToTrim.replaceAll(" +", " ").trim();
         }
 
         @NonNull
-        private List<IMenu> getMensaFromDivNode(String mensaName, Mensa.MenuCategory mealType, Node divNode) {
+        private List<IMenu> getMensaFromDivNode(String mensaName, Mensa.MenuCategory mealType, Node divNode) throws MensaClosedException{
             List<IMenu> menuList = new ArrayList<>();
 
-            Menu currentMenu = null;
+            int pCounter = 0;
+            UzhMenu currentMenu = null;
             for (int i = 0; i < divNode.getChildNodes().getLength(); i++) {
-                Node n = divNode.getChildNodes().item(i);
+                Node h3Node = divNode.getChildNodes().item(i);
 
-                if(n.getNodeName().equals("h3")) {
-                    // Found Begin of menu
-                    currentMenu = new Menu(null, null,null,null,null);
-                    menuList.add(currentMenu);
+                switch (h3Node.getNodeName()) {
+                    case "h3":
+                        // Found Begin of menu
+                        currentMenu = new UzhMenu(null, null, null, null, null);
+                        menuList.add(currentMenu);
 
-                    // found new Meal
-                    NodeList children = n.getChildNodes();
-                    String name = trimString(children.item(0).getNodeValue());
-                    currentMenu.setName(name);
-                    currentMenu.setId(Helper.getIdForMenu(mensaName, name, menuList.size() , mealType));
-                    currentMenu.setPrices(trimString(children.item(1).getFirstChild().getNodeValue()));
+                        // found new Meal
+                        Node titleNode = h3Node.getFirstChild();
+
+                        if (titleNode == null) {
+                            Log.e("UzhMensaCat.getMenufh3", "Error. Title node in h3 tag not found");
+                            continue;
+                        }
+
+                        String name = titleNode.getNodeValue();
+
+                        currentMenu.setName(name);
+                        currentMenu.setId(Helper.getIdForMenu(mensaName, name, menuList.size(), mealType));
+
+                        if (h3Node.getLastChild() != null && h3Node.getLastChild().getFirstChild() != null)
+                            currentMenu.setPrices(trimString(h3Node.getLastChild().getFirstChild().getNodeValue()));
+
+                        break;
+                    case "p":
+                        if (currentMenu == null)
+                            continue;
+                        if (pCounter == 0) {
+                            // Found Description
+                            currentMenu.setDescription(domAsString(h3Node));
+                            pCounter++;
+                        } else {
+                            currentMenu.setAllergene(domAsString(h3Node));
+                            pCounter = 0;
+                        }
+                        break;
+                    case "table":
+
+
+                        NodeList calorieNodes = h3Node.getChildNodes();
+
+                        for (int j = 1; j < calorieNodes.getLength(); j++) {
+                            Node calorieNode = calorieNodes.item(j);
+                            if (calorieNode.getNodeName().equals("tr") && calorieNode.getChildNodes().getLength() != 0) {
+                                currentMenu.addNutritionFact(trimString(domAsString(calorieNode.getFirstChild())), trimString(domAsString(calorieNode.getLastChild())));
+                            }
+                        }
+                        Log.d("i", "i");
+                        // FOUND TABLE WITH CALORIES
+                        break;
                 }
 
-                if(n.getNodeName().equals("p")) {
-                    if(currentMenu == null)
-                        continue;
-                    // Found Description
-                    currentMenu.setDescription(domAsString(n));
-                }
             }
+
+            if(menuList.isEmpty())
+                throw new MensaClosedException();
+
             return menuList;
         }
 
@@ -222,5 +303,10 @@ public class UzhMensaCategory extends MensaCategory {
     @Override
     public Integer getCategoryIconId() {
         return R.drawable.ic_uni;
+    }
+
+
+    private static class MensaClosedException extends Exception {
+
     }
 }

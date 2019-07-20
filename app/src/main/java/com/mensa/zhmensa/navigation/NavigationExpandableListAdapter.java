@@ -124,13 +124,12 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         return childPosition;
     }
 
-    @Nullable
-    @SuppressLint("InflateParams")
     @Override
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, @Nullable View convertView, ViewGroup parent) {
 
-        final String childText = getChild(groupPosition, childPosition).getDisplayName();
+        NavigationMenuChild child = getChild(groupPosition, childPosition);
+        final String childText = child.getDisplayName();
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context
@@ -138,6 +137,13 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.list_group_child, parent, false);
         }
 
+        TextView badge = convertView.findViewById(R.id.closed_badge);
+        Log.d("ldfrc","loading for child " + child.mensa == null ? "null" : child.mensa.getDisplayName());
+        Log.d("ldfrc","closed?" + child.mensa.isClosed());
+        if(child.mensa != null) {
+
+            badge.setVisibility(child.mensa.isClosed() ? View.VISIBLE : View.INVISIBLE);
+        }
         TextView txtListChild = convertView
                 .findViewById(R.id.lblListItem);
 

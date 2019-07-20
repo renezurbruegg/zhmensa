@@ -1,35 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
-        android:key="setting_title_title_category"
-        android:title="Title options">
 
-        <CheckBoxPreference
-            android:id="@+id/setting_title_show_id"
-            android:key="setting_title_show"
-            android:title="Show Main Title"
-            android:summary="Show/hide MainPage title" />
+    <Preference android:title="@string/show_hidden_menus_title"
+        android:key="@string/myDummyButton"
+        android:summary="@string/show_hidden_menus"/>
 
-        <EditTextPreference
-            android:key="setting_title_text"
-            android:title="Set Main Title"
-            android:summary="Change MainPage title"
-            android:dialogTitle="Change Title"
-            android:dialogMessage="Change title please..."/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:key="setting_title_font_category"
-        android:title="Font options">
-
-        <ListPreference
-            android:key="setting_title_font_color"
-            android:title="Title font colors"
-            android:summary="Change title font colors"
-            android:dialogTitle="Change font color" />
-
-    </PreferenceCategory>
-
+    <ListPreference
+        android:key="language_preference"
+        android:title="@string/language"
+        android:entries="@array/Language"
+        android:entryValues="@array/languageAlias"/>
 </PreferenceScreen>

@@ -10,7 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.FavoriteMenu;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
@@ -21,6 +23,8 @@ import com.mensa.zhmensa.services.MensaManager;
  */
 class MenuViewHolder extends RecyclerView.ViewHolder {
 
+    public static final String DUMMY = "dummy";
+
     MenuViewHolder(@NonNull View itemView) {
         super(itemView);
     }
@@ -29,12 +33,13 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
      * Binds the menu to a view.
      * @param viewHolder to view to bind to menu to
      * @param menu to menu
+     * @param mensaId
      */
-    static void bind(MenuViewHolder viewHolder, final IMenu menu, @NonNull final Context ctx) {
+    static void bind(MenuViewHolder viewHolder, final IMenu menu, @NonNull final Context ctx, final String mensaId) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());
-        ((TextView) viewHolder.itemView.findViewById(R.id.allergene)).setText(menu.getAllergene());
+        ((TextView) viewHolder.itemView.findViewById(R.id.allergene)).setText(menu.getAllergene(ctx));
 
         final ImageButton favBtn = viewHolder.itemView.findViewById(R.id.bookmark_button);
 
@@ -42,19 +47,23 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         final ImageButton shareBtn = viewHolder.itemView.findViewById(R.id.share_button);
         final LinearLayout showMoreLayout = viewHolder.itemView.findViewById(R.id.showmore_layout);
         final ImageButton showMoreBtn = viewHolder.itemView.findViewById(R.id.showmore_button);
+        final ImageButton hideMenuBtn = viewHolder.itemView.findViewById(R.id.hide_button);
 
-        if(Helper.firstNonNull(menu.getMeta(),"").equals("dummy")) {
 
+        if(Helper.firstNonNull(menu.getMeta(),"").equals(DUMMY)) {
             ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setGravity(View.TEXT_ALIGNMENT_CENTER);
             shareBtn.setVisibility(View.INVISIBLE);
             showMoreBtn.setVisibility(View.INVISIBLE);
             favBtn.setVisibility(View.INVISIBLE);
+            hideMenuBtn.setVisibility(View.INVISIBLE);
+
             return;
         } else {
             ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setGravity(View.TEXT_ALIGNMENT_TEXT_START);
             shareBtn.setVisibility(View.VISIBLE);
             showMoreBtn.setVisibility(View.VISIBLE);
             favBtn.setVisibility(View.VISIBLE);
+            hideMenuBtn.setVisibility( (menu instanceof FavoriteMenu) ? View.INVISIBLE : View.VISIBLE);
         }
 
 
@@ -74,6 +83,21 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
             }
         });
 
+
+        hideMenuBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MensaManager.hideMenu(menu, mensaId);
+                Snackbar.make(view, String.format(ctx.getString(R.string.menu_deleted) , menu.getName()), Snackbar.LENGTH_LONG)
+                        .setAction(ctx.getString(R.string.undo), new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                MensaManager.showMenu(menu, mensaId);
+                            }
+                        })
+                        .show();
+            }
+        });
 
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override

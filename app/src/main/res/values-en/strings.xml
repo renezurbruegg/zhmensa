@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Zürich Mensa</string>
+    <string name="action_reload">Reload</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_share_mensa">Share</string>
+    <string name="allergens">Alergens:</string>
+    <string name="dinner">Dinner</string>
+    <string name="error_download_mensas">Could not donwload menus. Please check your internet</string>
+    <string name="favorite_title">Favorites</string>
+    <string name="favorites_title">Favorites</string>
+    <string name="friday">Fr</string>
+    <string name="lunch">Lunch</string>
+    <string name="mensa_zurich_title">Mensa Zürich</string>
+    <string name="menu_deleted">Removed Menu: %1$s</string>
+    <string name="monday">Mo</string>
+    <string name="msg_menus_deleted">Cleared list with removed menus</string>
+    <string name="no_fav_msg">No Favorites avaiable</string>
+    <string name="no_menu_msg">Currently no menu avaiable</string>
+    <string name="settings">Settings</string>
+    <string name="show_hidden_menus">Click here to show all hidden menus again</string>
+    <string name="show_hidden_menus_title">Show hidden menus</string>
+    <string name="thursday">Th</string>
+    <string name="tuesday">Tu</string>
+    <string name="undo">Undo</string>
+    <string name="unknown">Unknown</string>
+    <string name="wednesday">We</string>
+    <string name="week_of">Week of: %1$s</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="nutrition_facts">Nutrition facts:</string>
+    <string name="language">Language</string>
+    <string name="closed">closed</string>
+
+</resources>

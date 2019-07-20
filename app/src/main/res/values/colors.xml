@@ -10,4 +10,6 @@
 
     <color name="colorPrimaryTextDefaultMaterialDark">#FFFFFFFF</color>
     <color name="colorSecondaryTextDefaultMaterialDark">#B3FFFFFF</color>
+    <color name="badge_border_color">#c2185b</color>
+    <color name="badge_fill_color">#c2185b</color>
 </resources>

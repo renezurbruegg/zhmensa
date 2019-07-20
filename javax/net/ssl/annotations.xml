@@ -1,0 +1,5 @@
+<root>
+    <item name='javax.net.ssl.SSLContext'>
+        <annotation name='org.jetbrains.annotations.NonNls' />
+    </item>
+</root>

@@ -28,8 +28,8 @@ public class NavigationMenuHeader implements  Comparable<NavigationMenuHeader>{
         return hasChildren;
     }
 
+    @SuppressWarnings("HardCodedStringLiteral")
     @NonNull
-    @Override
     public String toString() {
         return "Cat: " + (category == null ? "null" : category.getDisplayName())  + " - hasChildren: " + hasChildren;
     }

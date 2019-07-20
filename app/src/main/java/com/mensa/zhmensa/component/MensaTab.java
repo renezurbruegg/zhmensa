@@ -1,5 +1,6 @@
 package com.mensa.zhmensa.component;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,6 +10,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,9 +19,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
+import com.mensa.zhmensa.MainActivity;
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.filters.HiddenMenuFilter;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Mensa;
+import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
@@ -48,33 +54,9 @@ import java.util.List;
  * |--------------------------------------|
  */
 
-public class MensaTab {
+class MensaTab {
 
-    /**
-     * Unqiue Mensa Id that links this tab to a mensa object.
-     */
-    private final String mensaId;
-
-    /**
-     * Create Mensatab for a given mensaId.
-     * Mensa ID must map to a mensa stored in MensaManager
-     *
-     * @param mensaId the unique mensa id
-     */
-    public MensaTab(String mensaId) {
-        this.mensaId = mensaId;
-    }
-
-
-    /**
-     * @param weekday
-     * @return a fragment that contains the view for a given weekday
-     */
-    @NonNull
-    Fragment getFragmentForWeekday(Mensa.Weekday weekday) {
-        return MensaWeekdayTabFragment.getInstance(mensaId, weekday);
-    }
-
+    
 
     /**
      * Fragment view for a given day.
@@ -99,10 +81,17 @@ public class MensaTab {
      * |                                      |
      * |--------------------------------------|
      */
-    public static class MensaWeekdayTabFragment extends Fragment {
+    public static class MensaWeekdayTabFragment extends Fragment implements Observer<String> {
 
+        @SuppressWarnings("HardCodedStringLiteral")
+        static final String MENSA_ID = "mensaId";
+
+        @SuppressWarnings("HardCodedStringLiteral")
+        static final String WEEKDAY = "weekday";
         private TabAdapter adapter;
         private ViewPager vp;
+        private View view;
+
 
         /**
          * Creates a new instance. This function is used, since fragments get called with an empty constructor from android OS
@@ -118,42 +107,73 @@ public class MensaTab {
             Bundle args = new Bundle();
             Gson gson = new Gson();
 
-            args.putString("mensaId", mensaId);
-            args.putString("weekday", gson.toJson(weekday));
+            args.putString(MENSA_ID, mensaId);
+            args.putString(WEEKDAY, gson.toJson(weekday));
 
             frag.setArguments(args);
             return frag;
 
         }
 
+        @Override
+        public void onAttach(@NonNull Context context) {
+            super.onAttach(context);
+            Log.d("MensaTab.WeekdayTAbFr", "Attached fragment for " + getArguments().getString(MENSA_ID));
+
+        }
+
+        public void onStop() {
+            super.onStop();
+            ViewModelProviders.of(getActivity()).get(MainActivity.MensaUpdateModel.class).getUpdatedMensaId().removeObserver(this);
+        }
+
+
+        public void onStart() {
+            super.onStart();
+            Log.d("MensaOVERfrag.onSTart", "onstart for " + getArguments().getString(MENSA_ID));
+
+            MainActivity.MensaUpdateModel model = ViewModelProviders.of(getActivity()).get(MainActivity.MensaUpdateModel.class);
+            model.getUpdatedMensaId().observe(this, this);
+        }
+
+        @Override
+        public void onDetach() {
+            super.onDetach();
+            Log.d("MensaTab.WeekdayTAbFr", "Detached fragment for " + getArguments().getString(MENSA_ID));
+        }
 
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-            View view = inflater.inflate(R.layout.weekday_tab, container, false);
+            view = inflater.inflate(R.layout.weekday_tab, container, false);
             vp = view.findViewById(R.id.viewpager_weekday_content);
+            Log.d("MensaTab.WeekdayTAbFr", "Creating view for " + getArguments().getString(MENSA_ID));
 
 
-            adapter = new TabAdapter(getChildFragmentManager());
             TabLayout tabLayout = view.findViewById(R.id.tablayout_weekday_content);
             if (getArguments() == null) {
                 Log.e("MensaTab", "Arguemnts were null for fragment");
                 return view;
             }
 
-            String mensaId = getArguments().getString("mensaId");
-            String weekdayStr = getArguments().getString("weekday");
+            String mensaId = getArguments().getString(MENSA_ID);
+            String weekdayStr = getArguments().getString(WEEKDAY);
 
-            Log.e("MensaTab.ocw", "new viewpager: " + vp.toString() + "\n mensaId " + mensaId + " wekk:" + weekdayStr);
+            if (adapter == null) {
+                adapter = new TabAdapter(getChildFragmentManager());
 
-            for (Mensa.MenuCategory category : Mensa.MenuCategory.values()) {
-                String categoryStr = new Gson().toJson(category);
+                for (Mensa.MenuCategory category : Mensa.MenuCategory.values()) {
+                    String categoryStr = new Gson().toJson(category);
 
-                Fragment f = MenuTabContentFragment.newInstance(mensaId, weekdayStr, categoryStr);
-                adapter.addFragment(f, String.valueOf(category));
+                    Fragment f = MenuTabContentFragment.newInstance(mensaId, weekdayStr, categoryStr);
+                    adapter.addFragment(f, Helper.getLabelForMealType(category, getContext()));
+                }
             }
+            // Log.e("MensaTab.ocw", "new viewpager: " + vp.toString() + "\n mensaId " + mensaId + " wekk:" + weekdayStr);
+
 
             vp.setAdapter(adapter);
+
 
             tabLayout.setupWithViewPager(vp);
 
@@ -161,25 +181,47 @@ public class MensaTab {
         }
 
 
+        @Override
+        public void onResume() {
+            super.onResume();
+            Log.d("onResumeMensaTab", "On Resume called in mensa tab " + getArguments().getString(MENSA_ID));
+        }
+
         void notifyDatasetChanged() {
+            /*
+            if(view != null)
+                ((TextView)view.findViewById(R.id.update_weekday_tab)).setText("Updated " + ++numb);
+            else
+                Log.d("view null", "view was null");
 
             if (adapter == null) {
                 if (getArguments() == null)
                     return;
                 // View not created yet
-                Log.e("MensaTab.ndc", "Adapter was null for mensa and day: " + getArguments().getString("mensaId", "null") + " " + getArguments().getString("weekday", "null"));
+                Log.e("MensaTab.ndc", "Adapter was null for mensa and day: " + getArguments().getString("mensaId", "null") + " " + getArguments().getString("weekday", "null") + " \n Viewpager: " + (vp == null ? "null" : vp));
+
+                Log.d("MensaWeekdayTab", "added? " + isAdded());
                 return;
             }
+            Log.d("MensaWeekdayTab", "added? " + isAdded());*/
             adapter.notifyDataSetChanged();
 
         }
 
-        protected Mensa.MenuCategory getSelectedMealType() {
+        Mensa.MenuCategory getSelectedMealType() {
             Log.d("MensaTab.getSelMT", "get selected meal type. current item : " + (vp == null ? "null" : vp.getCurrentItem()));
-            if(vp != null) {
+            if (vp != null) {
                 return vp.getCurrentItem() == 0 ? Mensa.MenuCategory.LUNCH : Mensa.MenuCategory.DINNER;
             }
             return null;
+        }
+
+        @Override
+        public void onChanged(String s) {
+            Log.d("MensaOVfrag", "got change for " + s);
+            if (s.equals(getArguments().getString(MENSA_ID))) {
+                notifyDatasetChanged();
+            }
         }
     }
 
@@ -204,7 +246,16 @@ public class MensaTab {
      * | |----------------------------------| |
      * |--------------------------------------|
      */
-    public static class MenuTabContentFragment extends Fragment {
+    public static class MenuTabContentFragment extends Fragment implements Observer<String> {
+
+        @SuppressWarnings("HardCodedStringLiteral")
+        static final String MENSA_ID = "mensaId";
+
+        @SuppressWarnings("HardCodedStringLiteral")
+        static final String WEEKDAY = "weekday";
+
+        @SuppressWarnings("HardCodedStringLiteral")
+        static final String CATEGORY = "category";
 
         @Nullable
         private MenuCardAdapter adapter;
@@ -227,9 +278,9 @@ public class MensaTab {
         static MenuTabContentFragment newInstance(String mensaId, String weekdayStr, String categoryStr) {
             Bundle args = new Bundle();
 
-            args.putString("mensaId", mensaId);
-            args.putString("weekday", weekdayStr);
-            args.putString("category", categoryStr);
+            args.putString(MENSA_ID, mensaId);
+            args.putString(WEEKDAY, weekdayStr);
+            args.putString(CATEGORY, categoryStr);
 
 
             MenuTabContentFragment frag = new MenuTabContentFragment();
@@ -252,15 +303,15 @@ public class MensaTab {
 
             recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-            mensaId = getArguments().getString("mensaId");
-            category = new Gson().fromJson(getArguments().getString("category"), Mensa.MenuCategory.class);
-            weekday = new Gson().fromJson(getArguments().getString("weekday"), Mensa.Weekday.class);
+            mensaId = getArguments().getString(MENSA_ID);
+            category = new Gson().fromJson(getArguments().getString(CATEGORY), Mensa.MenuCategory.class);
+            weekday = new Gson().fromJson(getArguments().getString(WEEKDAY), Mensa.Weekday.class);
 
             menuList = MensaManager.getMenusForIdWeekAndCat(mensaId, category, weekday);
-            if(menuList.isEmpty())
+            if (menuList.isEmpty())
                 menuList = new ArrayList<>();
 
-            adapter = new MenuCardAdapter(menuList, mensaId);
+            adapter = new MenuCardAdapter(menuList, mensaId, new HiddenMenuFilter());
             recyclerView.setAdapter(adapter);
 
             return view;
@@ -268,12 +319,21 @@ public class MensaTab {
 
         @Override
         public void onResume() {
-            Log.d("on resume", "on resume in tab: " + mensaId + " day: " + weekday);
+            super.onResume();
+            Log.d("on resume", "on resume in tab: " + mensaId + " day: " + weekday + " adapter: " + (adapter == null ? "null" : "nonull"));
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
                 Log.d("adapter changed", "list: " + adapter.getItems());
             }
-            super.onResume();
+        }
+
+
+        public void onStart() {
+            super.onStart();
+            Log.d("MensaOVERfrag.onSTart-2", "onstart for " + getArguments().getString(MENSA_ID) + "day: " + weekday);
+            MainActivity.MensaUpdateModel model = ViewModelProviders.of(getActivity()).get(MainActivity.MensaUpdateModel.class);
+
+            model.getUpdatedMensaId().observe(this, this);
         }
 
         void notifyDatasetChanged() {
@@ -282,12 +342,12 @@ public class MensaTab {
                 menuList.clear();
                 List<IMenu> menus = MensaManager.getMenusForIdWeekAndCat(mensaId, category, weekday);
 
-                Log.d("NotifyDatasetChanged", "Mensa id: " + mensaId +" day: " + weekday + "Menus:" + menus.toString());
-                if(menus.isEmpty()) {
-                    menus = MensaManager.getPlaceholderForEmptyMenu(mensaId);
+                Log.d("NotifyDatasetChanged", "Mensa id: " + mensaId + " day: " + weekday + "Menus:" + menus.toString());
+                if (menus.isEmpty()) {
+                    menus = MensaManager.getPlaceholderForEmptyMenu(mensaId, getContext());
                 }
                 menuList.addAll(menus);
-             }
+            }
 
             if (adapter == null) {
                 Log.e("MensaTab.ndc", "adapter was null for " + mensaId + category + weekday);
@@ -298,12 +358,19 @@ public class MensaTab {
                 return;
             }
 
-            if(menuList != null && adapter != null) {
+            if (menuList != null && adapter != null) {
                 adapter.setItems(menuList);
             }
 
             adapter.notifyDataSetChanged();
 
+        }
+
+        @Override
+        public void onChanged(String s) {
+            if (s.equals(getArguments().getString(MENSA_ID))) {
+                notifyDatasetChanged();
+            }
         }
     }
 

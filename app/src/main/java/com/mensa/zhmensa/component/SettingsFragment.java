@@ -1,21 +1,65 @@
 package com.mensa.zhmensa.component;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 
+import com.google.android.material.snackbar.Snackbar;
+import com.mensa.zhmensa.MainActivity;
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.SettingsActivity;
+import com.mensa.zhmensa.services.LocaleManager;
+import com.mensa.zhmensa.services.MensaManager;
 
-public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener
-{
+import java.util.HashSet;
+
+public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private SettingsActivity parentActivity;
+
     @Override
-    public void onCreate(final Bundle savedInstanceState)
-    {
+    public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         addPreferencesFromResource(R.xml.settings_view);
+
+        Preference button = findPreference(getString(R.string.myDummyButton));
+
+        button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                //code for what you want it to do
+                PreferenceManager.getDefaultSharedPreferences(getContext())
+                        .edit()
+                        .putStringSet(MensaManager.DELETED_MENUS_STORE_ID, new HashSet<String>())
+                        .apply();
+                Snackbar.make(getView(), getString(R.string.msg_menus_deleted), Snackbar.LENGTH_SHORT).show();
+                return true;
+            }
+        });
+
+        findPreference("language_preference").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                new LocaleManager(getContext()).setNewLocale(getContext(), newValue.toString());
+                Log.d("change", "changed " + newValue);
+                Log.d("", PreferenceManager.getDefaultSharedPreferences(getContext()).getString("language_preference", "non"));
+
+                getActivity().finish();
+                startActivity(getActivity().getIntent());
+                /*Intent i = new Intent(getContext(), MainActivity.class);
+                startActivity(i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+                System.exit(0); */
+                return true;
+            }
+        });
+
     }
 
     @Override
@@ -36,14 +80,15 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     }
 
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, @NonNull String key)
-    {
-        Log.d("chhnged", "key: "+ key);
-        if (key.equals("setting_title_font_color"))
-        {
-            // get preference by key
-            //Preference pref = findPreference(key);
-            // do your stuff here
-        }
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        Log.d("ocpf", "prefernce cahgned " + s);
+
+/*        Intent i = new Intent(getContext(), MainActivity.class);
+        startActivity(i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
+        System.exit(0);*/
+    }
+
+    public void setListener(SettingsActivity settingsActivity) {
+            parentActivity = settingsActivity;
     }
 }

@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
 import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.List;
@@ -27,22 +29,36 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
     private Context context;
     private final SortedList<IMenu> menus;
+    private final String mensaId;
+    private final MenuFilter filter;
 
-    public MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId) {
+    MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId, MenuFilter menuFilter) {
+        this.filter = menuFilter;
+
         this.menus = new SortedList<>(IMenu.class, new ComparableSortedListAdapterCallback(this));
 
         if (menus != null) {
-            this.menus.addAll(menus);
+            for(IMenu menu : menus) {
+                if(menuFilter == null || menuFilter.apply(menu))
+                    this.menus.add(menu);
+            }
+          //  this.menus.addAll(menus);
         }
 
         if (this.menus.size() == 0) {
-            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId));
+            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId, MensaManager.activityContext));
         }
+
+        this.mensaId = Helper.firstNonNull(mensaId, "unknown Mensa");
     }
 
-    public void setItems(@NonNull List<IMenu> items ){
+    void setItems(@NonNull List<IMenu> items){
         this.menus.clear();
-        this.menus.addAll(items);
+        for (IMenu item: items) {
+            if(filter == null || filter.apply(item))
+                this.menus.add(item);
+        }
+        //this.menus.addAll(items);
     }
 
 
@@ -57,7 +73,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull MenuViewHolder holder, int position) {
         IMenu menu = menus.get(position);
-        MenuViewHolder.bind(holder, menu, context);
+        MenuViewHolder.bind(holder, menu, context, mensaId);
     }
 
     @Override
@@ -66,7 +82,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     }
 
 
-    public SortedList<IMenu> getItems() {
+    SortedList<IMenu> getItems() {
         return menus;
     }
 }
