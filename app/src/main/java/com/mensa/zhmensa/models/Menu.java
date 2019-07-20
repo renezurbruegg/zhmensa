@@ -1,9 +1,12 @@
 package com.mensa.zhmensa.models;
 
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -19,7 +22,7 @@ public class Menu implements IMenu{
     @Nullable
     private String prices;
     @Nullable
-    private String allergene;
+    protected String allergene;
     @Nullable
     private String meta;
     @NonNull
@@ -81,8 +84,9 @@ public class Menu implements IMenu{
     }
 
     @Nullable
-    public String getAllergene() {
-        return "Allergene: " + allergene;
+    public String getAllergene(Context ctx) {
+        allergene = Helper.firstNonNull(allergene,"").replaceAll(" *Allergene *:? *","").replaceAll(" *Allergy information *:? *","").replaceAll(" *Alergens *: *","");
+        return /*MensaManager.activityContext.getString(R.string.allergens) +*/ allergene;
     }
 
     @Override
@@ -90,11 +94,12 @@ public class Menu implements IMenu{
        return MensaManager.isFavorite(getId());
     }
 
-    private void setAllergene(@Nullable String allergene) {
+    @SuppressWarnings("HardCodedStringLiteral")
+    void setAllergene(@Nullable String allergene) {
         this.allergene = allergene;
-        if(this.allergene != null) {
-            this.allergene = this.allergene.replaceAll(" *Allergene *:? *","");
-        }
+        /*if(this.allergene != null) {
+            this.allergene = this.allergene.replaceAll(" *Allergene *:? *","").replaceAll(" *Allergy information *:? *","");
+        }*/
     }
 
     @Nullable
@@ -120,6 +125,7 @@ public class Menu implements IMenu{
     public boolean hasAllergene() {
         return (allergene != null && !allergene.isEmpty() && !allergene.equals("null"));
     }
+
 
     @Nullable
     @Override

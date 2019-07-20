@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.services.Helper;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +22,7 @@ public class FavoriteMensa extends Mensa {
     public FavoriteMensa(String displayName) {
         super(displayName, displayName);
 
-        setMensaCategory(new MensaCategory("Favorites", 0) {
+        setMensaCategory(new MensaCategory(Helper.getFavoriteTitle(), 0) {
             @Override
             public Integer getCategoryIconId() {
                 return R.drawable.ic_favorite_black_24dp;

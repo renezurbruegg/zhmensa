@@ -21,9 +21,12 @@ import java.util.List;
 import cz.msebera.android.httpclient.Header;
 
 
+@SuppressWarnings("HardCodedStringLiteral")
 public class EthMensaCategory extends MensaCategory {
      // e.g. https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/2019-07-05/lunch
-    private static final String apiRoute = "https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/de/";
+    private static final String apiRoute = "https://www.webservices.ethz.ch/gastro/v1/RVRI/Q1E1/meals/";
+
+    private static final String[] EXPECTED_MENSA_NAMES = {"food&lab", "Foodtrailer ETZ", "food market - pizza pasta", "food market - grill bbQ", "BELLAVISTA", "Polysnack", "Clausiusbar", "Polysnack", "FUSION coffee", "Rice Up!", "Fusion meal", "G-ESSbar", "Tannenbar", "food market - green day", "Mensa Polyterrasse", "Dozentenfoyer"}; //NON-NLS
 
     public EthMensaCategory(@NonNull String displayName, int pos) {
         super(displayName, pos);
@@ -93,18 +96,28 @@ public class EthMensaCategory extends MensaCategory {
         return menus;
     }
 
+
     @NonNull
     private static List<Mensa> convertJsonResponseToList(JSONArray array, Mensa.Weekday day, Mensa.MenuCategory menuCategory) {
         List<Mensa> mensaList = new ArrayList<>();
+        List<String> mensaNames = new ArrayList<>();
+
         for (int i = 0; i < array.length(); i++) {
             try {
                 JSONObject obj = (JSONObject) array.get(i);
                 String name = obj.getString("mensa");
+                mensaNames.add(name);
                 Mensa mensa = new Mensa(name, name);
                 mensa.setMenuForDayAndCategory(day, menuCategory, getMenusFromJsonArray(name, menuCategory,  obj.getJSONArray("meals")));
                 mensaList.add(mensa);
             } catch (JSONException e) {
                 Log.e("Error", (e == null ? "null" : e.getMessage() ));
+            }
+        }
+
+        for(String expectedName : EXPECTED_MENSA_NAMES) {
+            if(!mensaNames.contains(expectedName)) {
+                mensaList.add(new Mensa(expectedName, expectedName, true));
             }
         }
         return mensaList;
@@ -114,7 +127,7 @@ public class EthMensaCategory extends MensaCategory {
     private String getApiRoute(Mensa.Weekday day, Mensa.MenuCategory mealType) {
         String mealStr = mealType == Mensa.MenuCategory.LUNCH ? "lunch" : "dinner";
 
-        return apiRoute + Helper.getDay(day.day) + "/" + mealStr;
+        return apiRoute + Helper.getLanguageCode() + "/" + Helper.getDay(day.day) + "/" + mealStr;
     }
 
     @NonNull

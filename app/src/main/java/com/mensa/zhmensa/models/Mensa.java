@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.filters.MenuFilter;
+import com.mensa.zhmensa.filters.MenuIdFilter;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -25,6 +26,8 @@ import static com.mensa.zhmensa.services.Helper.firstNonNull;
  */
 public class Mensa implements Comparable<Mensa> {
 
+    private boolean loadedFromCache = false;
+
     @Nullable
     private final String displayName;
 
@@ -34,6 +37,30 @@ public class Mensa implements Comparable<Mensa> {
     @NonNull
     final Map<Weekday, Map<MenuCategory, Set<IMenu>>> meals;
     private MensaCategory category;
+
+    private boolean closed = false;
+
+
+    public boolean loadedFromCache(){
+        return loadedFromCache;
+    }
+
+    public void setLoadedFromCache(boolean loadedFromCache){
+        this.loadedFromCache = loadedFromCache;
+    }
+
+    public boolean isClosed() {
+        return closed;
+    }
+
+    public void setClosed(boolean closed) {
+        this.closed = closed;
+    }
+
+    public Mensa(@Nullable  String displayName, @Nullable  String id, boolean closed) {
+        this(displayName, id);
+        this.closed = closed;
+    }
 
     public Mensa(@Nullable  String displayName, @Nullable  String id) {
         meals = new HashMap<>();
@@ -116,13 +143,12 @@ public class Mensa implements Comparable<Mensa> {
     }
 
     @NonNull
-    public String getAsSharableString() {
+    public String getAsSharableString(@NonNull  Weekday day, @NonNull MenuCategory mealType) {
 
-        String date = Helper.getHumanReadableDay(MensaManager.SELECTED_DAY);
+        String date = Helper.getHumanReadableDay(day.day);
         StringBuilder sb = new StringBuilder();
 
-        Weekday day = Weekday.of(MensaManager.SELECTED_DAY);
-        List<IMenu> menus = getMenusForDayAndCategory(day, MensaManager.MEAL_TYPE);
+        List<IMenu> menus = getMenusForDayAndCategory(day, mealType);
         sb.append(getDisplayName()).append(" - ").append(date).append("\n");
 
         for(IMenu menu : menus) {
@@ -135,6 +161,43 @@ public class Mensa implements Comparable<Mensa> {
 
     public void clearMenus() {
         meals.clear();
+    }
+
+    public void removeMenusMatching(MenuIdFilter filter) {
+        for(Weekday day: Weekday.values()) {
+            Map<MenuCategory,Set<IMenu>> mealTypeToMenu = meals.get(day);
+
+            if(mealTypeToMenu == null) {
+                Log.d("Mensa.remove", "Could not find menu for day: " + day);
+                continue;
+            }
+
+            for (MenuCategory cat: MenuCategory.values() ) {
+
+                Set<IMenu> menus = mealTypeToMenu.get(cat);
+
+                if(menus == null) {
+                    Log.d("Mensa.remove", "Could not find menus for day: and cat: " + day + " " + cat);
+                    continue;
+                }
+
+                Log.d("Mensa.remove", "Current menus:" +  menus.toString());
+                Set<IMenu> storedMenus = new HashSet<>();
+
+                for(IMenu sMenu : menus) {
+                    if(!filter.apply(sMenu))
+                        storedMenus.add(sMenu);
+                }
+
+                if(storedMenus.isEmpty())
+                    continue;
+
+
+                Log.d("FavMensa.remove", "New menus:" +  menus.toString());
+                mealTypeToMenu.put(cat, storedMenus);
+                meals.put(day, mealTypeToMenu);
+            }
+        }
     }
 
 
@@ -151,7 +214,7 @@ public class Mensa implements Comparable<Mensa> {
             this.day = day;
         }
 
-        static Weekday of(int day) {
+        public static Weekday of(int day) {
 
            for(Weekday knownDay: Weekday.values())
            {

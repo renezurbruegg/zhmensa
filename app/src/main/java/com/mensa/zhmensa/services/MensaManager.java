@@ -1,14 +1,14 @@
 package com.mensa.zhmensa.services;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.filters.MenuIdFilter;
 import com.mensa.zhmensa.models.EthMensaCategory;
@@ -38,21 +38,28 @@ import java.util.Set;
 public class MensaManager {
 
 
+    @SuppressWarnings("HardCodedStringLiteral")
+    public static final String DELETED_MENUS_STORE_ID = "deleted_menus" ;
+    public static Set<String> HIDDEN_MENU_IDS = new HashSet<>();
+
+    @SuppressWarnings("HardCodedStringLiteral")
     private static final String LAST_UPDATE_PREF = "last_update";
     public static int SELECTED_DAY = Helper.getCurrentDay();
     /**
      * Context used to get shared Preferences
      */
-    @SuppressLint("StaticFieldLeak")
-    private static Context activityContext;
+    public static Context activityContext;
 
     /**
      * Key to get shared preferences
      */
+    @SuppressWarnings("HardCodedStringLiteral")
     private final static String SHARED_PREFS_NAME = "com.zhmensa.favorites";
+
     /**
      * Key to find favorite Menu id String set
      */
+    @SuppressWarnings("HardCodedStringLiteral")
     private final static String FAVORITE_STORE_ID = "favorite";
 
     /**
@@ -63,7 +70,7 @@ public class MensaManager {
     /**
      * Favorite Mensa. Contains all meals that are marked as favorites
      */
-    private final static FavoriteMensa favoriteMensa = new FavoriteMensa("Favorites");
+    private static FavoriteMensa favoriteMensa;
 
     /**
      * List containing ID's of menus that are marked as favorites
@@ -71,12 +78,29 @@ public class MensaManager {
     @Nullable
     private static Set<String> favoriteIds = new HashSet<>();
 
+
     @NonNull
     public static final Mensa.MenuCategory MEAL_TYPE = Mensa.MenuCategory.LUNCH;
 
-    private static final List<OnMensaLoadedListener> listeners = new ArrayList<>();
+    private static OnMensaLoadedListener listener = new OnMensaLoadedListener() {
+        @Override
+        public void onNewMensaLoaded(List<Mensa> mensa) {
 
-    private static final MensaCategory dummyHonggCat = new EthMensaCategory("ETH-Hönggerberg", Arrays.asList("FUSION coffee", "FUSION meal", "Rice Up!", "food market - green day", "food market - grill bbQ", "food market - plaza pasta", "BELLAVISTA", "Food market - pizza pasta"), 2) {
+        }
+
+        @Override
+        public void onMensaUpdated(Mensa mensa) {
+
+        }
+
+        @Override
+        public void onMensaOpeningChanged() {
+
+        }
+    };
+
+    @SuppressWarnings("HardCodedStringLiteral")
+    private static final MensaCategory dummyHonggCat = new EthMensaCategory("ETH-Hönggerberg", Arrays.asList("FUSION coffee", "FUSION meal", "Rice Up!", "food market - green day", "food market - grill bbQ", "food market - pizza pasta", "BELLAVISTA", "Food market - pizza pasta"), 2) {
         @NonNull
         @Override
         public List<MensaListObservable> loadMensasFromAPI() {
@@ -84,6 +108,7 @@ public class MensaManager {
         }
     };
 
+    @SuppressWarnings("HardCodedStringLiteral")
     private static final MensaCategory dummyUzhIrchel = new UzhMensaCategory("UZH-Irchel", Arrays.asList("Irchel", "Tierspital"), 4) {
         @NonNull
         @Override
@@ -93,7 +118,10 @@ public class MensaManager {
 
     };
 
+    @SuppressWarnings("HardCodedStringLiteral")
     private static final MensaCategory ETH_ZENT = new EthMensaCategory("ETH-Zentrum", 1);
+
+    @SuppressWarnings("HardCodedStringLiteral")
     private static final MensaCategory UZH_ZENT = new UzhMensaCategory("UZH-Zentrum",3);
     private static final MensaCategory[] categories = {ETH_ZENT, dummyHonggCat, UZH_ZENT , dummyUzhIrchel};
 
@@ -117,22 +145,22 @@ public class MensaManager {
 */
 
 
-    /**
-     * Adds a new mensa for a given category, given day and given mealtype.
-     *
-     * @param mensas Mensa items to store
-     * @param category MenuCategory
-     * @param day
-     * @param mealType
-     */
-    private static void addNewMensaItem(List<Mensa> mensas, MensaCategory category, Mensa.Weekday day, Mensa.MenuCategory mealType) {
+
+        /**
+         * Adds a new mensa for a given category, given day and given mealtype.
+         *
+         * @param mensas Mensa items to store
+         * @param category MenuCategory
+         * @param day
+         * @param mealType
+         */
+    private static void addNewMensaItem(List<Mensa> mensas, MensaCategory category, Mensa.Weekday day, Mensa.MenuCategory mealType, boolean loadedFromInternet) {
         boolean changedFav = false;
         for (Mensa mensa : mensas) {
             mensa.setMensaCategory(getCategoryForMensa(mensa, category));
 
             // New loaded Menus
             List<IMenu> newMenus = mensa.getMenusForDayAndCategory(day, mealType);
-
 
             putAndUpdate(mensa, day, mealType, newMenus);
 
@@ -148,8 +176,7 @@ public class MensaManager {
             }
         }
         if(changedFav) {
-            for (OnMensaLoadedListener l : listeners)
-                l.onMensaUpdated(favoriteMensa);
+            listener.onMensaUpdated(favoriteMensa);
         }
     }
 
@@ -169,6 +196,16 @@ public class MensaManager {
             for(MensaCategory cat : mensaMap.keySet()) {
                 storeMensasForCategory(cat, mensaMap.get(cat));
             }
+
+
+
+            //Log.d("MensaManager.storeMensa", "Storing:" + mensaJson);
+           PreferenceManager.getDefaultSharedPreferences(activityContext)
+                    .edit()
+                    .putStringSet(DELETED_MENUS_STORE_ID, HIDDEN_MENU_IDS)
+                    .apply();
+
+
     }
 
     private static void storeMensasForCategory(@NonNull MensaCategory category, List<Mensa> mensas) {
@@ -223,10 +260,15 @@ public class MensaManager {
 
 
 
+        // List<Mensa> loadedMensas = new ArrayList<>();
+
         for (String mensaJson : mensaJsons) {
             Mensa mensa = Helper.getMensaFromJsonString(mensaJson);
+            mensa.setLoadedFromCache(true);
+           // loadedMensas.add(mensa);
             Log.d("MensaManager.loadCache", "Found Mensa: " + mensa.getDisplayName());
-            mensa.setMensaCategory(category);
+
+            mensa.setMensaCategory( getCategoryForMensa(mensa, category));
 
             if(!put(mensa)) {
                 Log.e("MensaManager-lcmfc", "Tried to store mensa " + mensa.getDisplayName() + " but mensa was allready known");
@@ -299,9 +341,8 @@ public class MensaManager {
                 }
             }
 
-            for(OnMensaLoadedListener listener : listeners){
-                listener.onMensaUpdated(favoriteMensa);
-            }
+            listener.onMensaUpdated(favoriteMensa);
+
         }
     }
 
@@ -317,21 +358,20 @@ public class MensaManager {
      * @return true if mensa was added succesfully
      */
     private static boolean put(@NonNull Mensa mensa, @SuppressWarnings("SameParameterValue") boolean notifyListener) {
-        if (IdToMensaMapping.get(mensa.getUniqueId()) == null) {
+        Mensa storedMensa = IdToMensaMapping.get(mensa.getUniqueId());
+        if (storedMensa == null) {
             IdToMensaMapping.put(mensa.getUniqueId(), mensa);
 
             // New mensa was inserted
             Log.d("MensaManager", "New mensa added: " + mensa.getDisplayName() + " triggering listener");
-            for (OnMensaLoadedListener listener : listeners) {
-                listener.onNewMensaLoaded(Collections.singletonList(mensa));
-            }
+            listener.onNewMensaLoaded(Collections.singletonList(mensa));
+
 
             return true;
         } else if(notifyListener){
-            for (OnMensaLoadedListener listener : listeners) {
                 listener.onMensaUpdated(mensa);
-            }
         }
+
 
         return false;
     }
@@ -341,7 +381,7 @@ public class MensaManager {
         Mensa storedMensa = getMensaForId(mensa.getUniqueId());
         Log.d("putAndUpdaate", "Mensa: " + mensa.toString());
         if(storedMensa == null) {
-            put(mensa);
+            put(mensa, true);
             return;
         }
 
@@ -367,9 +407,16 @@ public class MensaManager {
             storedMensa.setMenuForDayAndCategory(day, mealType, newMenus);
 
         }
-        for (OnMensaLoadedListener listener : listeners) {
-            listener.onMensaUpdated(mensa);
+
+        if(storedMensa.loadedFromCache()) {
+            storedMensa.setLoadedFromCache(false);
+            storedMensa.setClosed(mensa.isClosed());
+            listener.onMensaOpeningChanged();
+        } else if(storedMensa.isClosed() && !mensa.isClosed()) {
+            storedMensa.setClosed(false);
+            listener.onMensaOpeningChanged();
         }
+        listener.onMensaUpdated(mensa);
 
 
         // If Mensa was already stored, add the new menu to the one mensa that is allready stored.
@@ -393,8 +440,14 @@ public class MensaManager {
     public static void setActivityContext(Context context) {
         activityContext = context;
 
+
+       favoriteMensa = new FavoriteMensa(context.getString(R.string.favorites_title));
         // Load favorite Ids from shared Preferences.
         favoriteIds = new HashSet<>(activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE).getStringSet(FAVORITE_STORE_ID, new HashSet<String>()));
+        //HIDDEN_MENU_IDS = new HashSet<>(activityContext.getSharedPreferences(SHARED_PREFS_NAME, Context.MODE_PRIVATE).getStringSet(DELETED_MENUS_STORE_ID, new HashSet<String>()));
+        HIDDEN_MENU_IDS = new HashSet<>(PreferenceManager.getDefaultSharedPreferences(activityContext).getStringSet(DELETED_MENUS_STORE_ID, new HashSet<String>()));
+
+
     }
 
     /**
@@ -412,9 +465,8 @@ public class MensaManager {
             Log.d("MensaManager", "Toggle favorite for Menu: " + favMenu.getId());
             favoriteMensa.removeMenuFromList(favMenu);
             favoriteIds.remove(favMenu.getId());
-            for(OnMensaLoadedListener listener : listeners) {
-                listener.onMensaUpdated(favoriteMensa);
-            }
+            listener.onMensaUpdated(favoriteMensa);
+
         } else {
             // Add to favorites
             addFavMenuById(favMenu.getId());
@@ -437,8 +489,8 @@ public class MensaManager {
      * Adds a listener that will be called every time a new Mensa is loaded
      * @param listener
      */
-    public static void addOnMensaLoadListener(OnMensaLoadedListener listener) {
-        listeners.add(listener);
+    public static void setOnMensaLoadListener(OnMensaLoadedListener listener) {
+        MensaManager.listener = listener;
     }
 
     /**
@@ -446,6 +498,7 @@ public class MensaManager {
      * @return dummy mensa
      */
     @Deprecated
+    @SuppressWarnings("HardCodedStringLiteral")
     public static Mensa getTestMensa() {
         return new Mensa("Dummy", "test");/*
                 Arrays.<IMenu>asList(new Menu("WOK STREET", "GAENG PED\n" +
@@ -478,6 +531,7 @@ public class MensaManager {
      * @return
      */
     @NonNull
+    @SuppressWarnings("HardCodedStringLiteral")
     public static String printMensa(String mensaId) {
         return Helper.firstNonNull(IdToMensaMapping.get(mensaId), new Mensa("Dummy","Dummy")).toString();
     }
@@ -544,15 +598,16 @@ public class MensaManager {
         clearState();
     }
 
-    public static List<IMenu> getPlaceholderForEmptyMenu(String mensaId) {
+
+    @SuppressWarnings("HardCodedStringLiteral")
+    public static List<IMenu> getPlaceholderForEmptyMenu(String mensaId, Context ctx) {
         if(isFavoriteMensa(mensaId)) {
-            return Collections.<IMenu>singletonList(new Menu("dummy-np-items-fav", "", "Keine Favoriten vorhanden", "", "", "dummy"));
+            return Collections.<IMenu>singletonList(new Menu("dummy-np-items-fav", "", ctx.getString(R.string.no_fav_msg), "", "", "dummy"));
         }
-        return Collections.<IMenu>singletonList(new Menu("dummy-no-items", "", "Momentan kein Menü verfügbar", "", "", "dummy"));
+        return Collections.<IMenu>singletonList(new Menu("dummy-no-items", "", ctx.getString(R.string.no_menu_msg), "", "", "dummy"));
     }
 
     public static Observable loadMensasForCategoryFromInternet(final MensaCategory category) {
-
 
         if(category.getDisplayName().equals(favoriteMensa.getCategory().getDisplayName())){
             Log.d("MensaManager,loadfint", "Fav mensa to load");
@@ -595,7 +650,8 @@ public class MensaManager {
                     category.setLastUpdated(Helper.getStartOfWeek().getMillis());
 
                     // Add every new mensa to the mensa mapping. This will notify all listeners and they will appear in the sidebar.
-                    addNewMensaItem(observable.getNewItems(), category, observable.day, observable.mealType);
+                    addNewMensaItem(observable.getNewItems(), category, observable.day, observable.mealType, true);
+
                     onLoadedObservable.loadingFinished();
                 }
             });
@@ -606,6 +662,45 @@ public class MensaManager {
 
     public static void invalidateMensa(String mensaId) {
         IdToMensaMapping.get(mensaId).clearMenus();
+    }
+
+    public static void hideMenu(IMenu menu, String mensaId) {
+        Log.d("MensaManager.hideMenu", "Hiding menu: " + menu.getId() + " in mensa: " + mensaId);
+
+        if(HIDDEN_MENU_IDS.contains(menu.getId())) {
+            Log.e("MensaMan.hideMenu", "Menu allready hidden");
+        } else {
+            HIDDEN_MENU_IDS.add(menu.getId());
+        }
+
+        PreferenceManager.getDefaultSharedPreferences(activityContext)
+                .edit()
+                .putStringSet(DELETED_MENUS_STORE_ID, HIDDEN_MENU_IDS)
+                .apply();
+
+        Mensa mensa = getMensaForId(mensaId);
+        if(mensa == null)
+            return;
+
+
+        listener.onMensaUpdated(mensa);
+
+    }
+
+    public static void showMenu(IMenu menu, String mensaId) {
+        HIDDEN_MENU_IDS.remove(menu.getId());
+        Mensa mensa = getMensaForId(mensaId);
+
+        if(mensa == null)
+            return;
+
+        listener.onMensaUpdated(mensa);
+
+
+        PreferenceManager.getDefaultSharedPreferences(activityContext)
+                .edit()
+                .putStringSet(DELETED_MENUS_STORE_ID, HIDDEN_MENU_IDS)
+                .apply();
     }
 
 
@@ -622,18 +717,20 @@ public class MensaManager {
         void onNewMensaLoaded(List<Mensa> mensa);
 
         void onMensaUpdated(Mensa mensa);
+
+        void onMensaOpeningChanged();
     }
 
     public static class OnLoadedObservable extends Observable {
         private int count = 0;
         private final int maxCount;
 
-        public OnLoadedObservable(int maxLoads) {
+        OnLoadedObservable(int maxLoads) {
             maxCount = maxLoads;
         }
 
 
-        public void loadingFinished() {
+        void loadingFinished() {
             count += 1;
             if(count == maxCount) {
                 setChanged();

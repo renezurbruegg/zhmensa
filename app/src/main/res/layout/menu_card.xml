@@ -115,8 +115,19 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:padding="12dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/share_button"
+                app:layout_constraintTop_toTopOf="@+id/hide_button"
                 app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp" />
+
+            <ImageButton
+                android:id="@+id/hide_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="12dp"
+
+                app:layout_constraintEnd_toStartOf="@+id/bookmark_button"
+                app:layout_constraintTop_toTopOf="@+id/bookmark_button"
+                app:srcCompat="@drawable/ic_visibility_off_black_24dp" />
 
             <ImageButton
                 android:id="@+id/bookmark_button"

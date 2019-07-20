@@ -1,8 +1,10 @@
 package com.mensa.zhmensa.services;
 
+import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,6 +15,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.models.IMenu;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.models.MensaCategory;
@@ -23,6 +26,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.lang.reflect.Type;
+import java.util.Locale;
 
 @SuppressWarnings("unused")
 public class Helper {
@@ -30,6 +34,7 @@ public class Helper {
 
     private static Gson gson;
 
+    @SuppressWarnings("HardCodedStringLiteral")
     private static final String[] UNIQUE_MENU_MENSA = {"Tannebar"};
     @SafeVarargs
     @NonNull
@@ -49,6 +54,7 @@ public class Helper {
      * @param mealType
      * @return
      */
+    @SuppressWarnings("HardCodedStringLiteral")
     public static String getIdForMenu(String mensaName, String menuName, int loadIndex, Mensa.MenuCategory mealType) {
         if(isDubiousMenuName(mensaName, menuName)) {
             return "'uni:" + mensaName + "' pos: " + loadIndex + " mealtype:" + mealType;
@@ -78,7 +84,7 @@ public class Helper {
      *
      * @return the dstart of this week as date time object
      */
-    public static DateTime getStartOfWeek() {
+    static DateTime getStartOfWeek() {
         DateTime dateTime = new DateTime(System.currentTimeMillis());
 
         if(dateTime.getDayOfWeek() > 5) {
@@ -110,6 +116,10 @@ public class Helper {
         return getDay(getStartOfWeek().plusDays(selectedDay), DateTimeFormat.forPattern("dd MMMM"));
     }
 
+    public static String getDayForPattern(int selectedDay, String pattern) {
+        return getDay(getStartOfWeek().plusDays(selectedDay), DateTimeFormat.forPattern(pattern));
+    }
+
 
 
 
@@ -134,18 +144,33 @@ public class Helper {
     }
 
 
-    public static String getNameForDay(Mensa.Weekday day) {
-        switch (day) {
-            case MONDAY:
-                return "Mo";
-            case TUESDAY:
-                return "Di";
-            case WEDNESDAY:
-                return "Mi";
-            case THURSDAY:
-                return "Do";
-            case FRIDAY:
-                return "Fr";
+    public static String getNameForDay(Mensa.Weekday day, Context ctx) {
+        if(ctx != null) {
+            switch (day) {
+                case MONDAY:
+                    return ctx.getString(R.string.monday);
+                case TUESDAY:
+                    return ctx.getString(R.string.tuesday);
+                case WEDNESDAY:
+                    return ctx.getString(R.string.wednesday);
+                case THURSDAY:
+                    return ctx.getString(R.string.thursday);
+                case FRIDAY:
+                    return ctx.getString(R.string.friday);
+            }
+        } else {
+            switch (day) {
+                case MONDAY:
+                    return "Mo";
+                case TUESDAY:
+                    return "Tu";
+                case WEDNESDAY:
+                    return "We";
+                case THURSDAY:
+                    return "Th";
+                case FRIDAY:
+                    return "Fr";
+            }
         }
         return String.valueOf(day);
     }
@@ -155,10 +180,14 @@ public class Helper {
      * @return 0 for monday, 4 for friday...
      */
     static int getCurrentDay() {
-        return Math.min(new DateTime(System.currentTimeMillis()).getDayOfWeek() , DateTimeConstants.FRIDAY) - DateTimeConstants.MONDAY;
+        int currentDay = new DateTime(System.currentTimeMillis()).getDayOfWeek();
+        if(currentDay > DateTimeConstants.FRIDAY)
+            return 0;
+
+        return currentDay - DateTimeConstants.MONDAY;
     }
 
-    public static boolean isDataStillValid(Long lastUpdated) {
+    static boolean isDataStillValid(Long lastUpdated) {
             Log.d("lastupdatecheck", "Last updated: " + new DateTime(lastUpdated));
         return getDay(0).equals(getDay(new DateTime(lastUpdated), DateTimeFormat.forPattern("yyyy-MM-dd")));
     }
@@ -167,15 +196,33 @@ public class Helper {
         return str.replaceAll("<[^>]+>","");
     }
 
+    public static String getFavoriteTitle() {
+        // TODO
+        return "Favoriten";
+    }
+
+    public static String getLabelForMealType(Mensa.MenuCategory category, Context context) {
+        switch (category){
+            case LUNCH: return context.getString(R.string.lunch);
+            case DINNER: return context.getString(R.string.dinner);
+        }
+
+        return context.getString(R.string.unknown);
+    }
+
 
     @SuppressWarnings("SameReturnValue")
     @NonNull
-    public String getLanguageCode() {
-        return "de";
+    public static String getLanguageCode() {
+        if(MensaManager.activityContext != null)
+            return PreferenceManager.getDefaultSharedPreferences(MensaManager.activityContext).getString("language_preference", Locale.getDefault().getLanguage());
+        else
+            return Locale.getDefault().getLanguage();
     }
 
 
 
+    @SuppressWarnings("HardCodedStringLiteral")
     static final class InterfaceAdapter<T> implements JsonSerializer<T>, JsonDeserializer<T> {
         @NonNull
         public JsonElement serialize(T object, Type interfaceType, JsonSerializationContext context) {

@@ -1,0 +1,5 @@
+<root>
+    <item name='org.joda.time.format.DateTimeFormat'>
+        <annotation name='org.jetbrains.annotations.NonNls' />
+    </item>
+</root>
