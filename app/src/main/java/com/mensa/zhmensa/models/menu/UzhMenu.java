@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.menu;
 
 import android.content.Context;
 import android.util.Log;
@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
-import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

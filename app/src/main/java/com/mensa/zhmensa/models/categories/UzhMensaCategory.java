@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.categories;
 
 import android.util.Log;
 
@@ -8,6 +8,10 @@ import androidx.annotation.Nullable;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.menu.IMenu;
+import com.mensa.zhmensa.models.Mensa;
+import com.mensa.zhmensa.models.MensaListObservable;
+import com.mensa.zhmensa.models.menu.UzhMenu;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.HttpUtils;
 

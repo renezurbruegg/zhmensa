@@ -1,6 +1,5 @@
 package com.mensa.zhmensa.navigation;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.util.Log;
@@ -11,18 +10,14 @@ import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.SortedList;
 
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
 import com.mensa.zhmensa.models.Mensa;
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;

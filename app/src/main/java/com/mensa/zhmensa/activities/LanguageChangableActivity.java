@@ -1,4 +1,4 @@
-package com.mensa.zhmensa;
+package com.mensa.zhmensa.activities;
 
 import android.content.Context;
 import android.util.Log;

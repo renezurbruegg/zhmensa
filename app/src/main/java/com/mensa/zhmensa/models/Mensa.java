@@ -7,8 +7,9 @@ import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.filters.MenuIdFilter;
+import com.mensa.zhmensa.models.categories.MensaCategory;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.services.Helper;
-import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.ArrayList;
 import java.util.Collections;

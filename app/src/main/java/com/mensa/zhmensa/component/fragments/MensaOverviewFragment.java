@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.component;
+package com.mensa.zhmensa.component.fragments;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -17,8 +17,9 @@ import androidx.lifecycle.ViewModelProviders;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
-import com.mensa.zhmensa.MainActivity;
+import com.mensa.zhmensa.activities.MainActivity;
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.component.NonSwipeableViewPager;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;

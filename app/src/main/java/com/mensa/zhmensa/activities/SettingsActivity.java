@@ -1,12 +1,10 @@
-package com.mensa.zhmensa;
+package com.mensa.zhmensa.activities;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import com.mensa.zhmensa.component.SettingsFragment;
+import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.component.fragments.SettingsFragment;
 import com.mensa.zhmensa.services.MensaManager;
 
 public class SettingsActivity extends LanguageChangableActivity {

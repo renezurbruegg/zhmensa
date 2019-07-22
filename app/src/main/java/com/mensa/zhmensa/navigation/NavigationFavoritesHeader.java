@@ -6,9 +6,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 import com.mensa.zhmensa.models.MensaListObservable;
-import com.mensa.zhmensa.services.MensaManager;
 
 import java.util.Collections;
 import java.util.List;

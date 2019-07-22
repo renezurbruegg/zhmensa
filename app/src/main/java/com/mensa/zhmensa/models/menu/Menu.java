@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.menu;
 
 
 import android.content.Context;
@@ -6,7 +6,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -65,7 +64,7 @@ public class Menu implements IMenu{
         return description;
     }
 
-    void setDescription(@Nullable String description) {
+    public void setDescription(@Nullable String description) {
         this.description = description;
     }
 
@@ -93,7 +92,7 @@ public class Menu implements IMenu{
         return isVegi;
     }
 
-    void setPrices(@Nullable String prices) {
+    public void setPrices(@Nullable String prices) {
         this.prices = prices;
     }
 
@@ -109,7 +108,7 @@ public class Menu implements IMenu{
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
-    void setAllergene(@Nullable String allergene) {
+    public void setAllergene(@Nullable String allergene) {
         this.allergene = allergene;
         /*if(this.allergene != null) {
             this.allergene = this.allergene.replaceAll(" *Allergene *:? *","").replaceAll(" *Allergy information *:? *","");

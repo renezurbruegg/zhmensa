@@ -2,7 +2,7 @@ package com.mensa.zhmensa.filters;
 
 import androidx.annotation.NonNull;
 
-import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.models.menu.IMenu;
 
 /**
  * Filter implementation that filters on a given menu id

@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.component;
+package com.mensa.zhmensa.adapters;
 
 import android.util.Log;
 
@@ -8,20 +8,22 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 
+import com.mensa.zhmensa.component.fragments.MensaTab;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Adapter that manages tabs in tab-layout
  */
-class TabAdapter extends FragmentStatePagerAdapter {
+public class TabAdapter extends FragmentStatePagerAdapter {
 
 
     public static final String MENSA_ID = "mensaId";
-    private final List<Fragment> mFragmentList = new ArrayList<>();
+    private final List<MensaTab.MenuTabContentFragment> mFragmentList = new ArrayList<>();
     private final List<String> mFragmentTitleList = new ArrayList<>();
 
-    TabAdapter(@NonNull FragmentManager fm) {
+    public TabAdapter(@NonNull FragmentManager fm) {
         super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
     }
 
@@ -31,7 +33,7 @@ class TabAdapter extends FragmentStatePagerAdapter {
         return mFragmentList.get(position);
     }
 
-    void addFragment(Fragment fragment, String title) {
+    public void addFragment(MensaTab.MenuTabContentFragment fragment, String title) {
         mFragmentList.add(fragment);
         mFragmentTitleList.add(title);
     }
@@ -40,16 +42,9 @@ class TabAdapter extends FragmentStatePagerAdapter {
     public void notifyDataSetChanged() {
         super.notifyDataSetChanged();
 
-        for (Fragment frag : mFragmentList) {
-            if(frag instanceof MensaTab.MensaWeekdayTabFragment) {
+        for (MensaTab.MenuTabContentFragment frag : mFragmentList) {
                 Log.d("TabAdapter.ndsc", "MensaWeekdayTabFragment " + frag.getId() + " mensa " + frag.getArguments().getString(MENSA_ID) );
-                ((MensaTab.MensaWeekdayTabFragment) frag).notifyDatasetChanged();
-            }
-            else if(frag instanceof MensaTab.MenuTabContentFragment) {
-                Log.d("TabAdapter.ndsc", "MensaWeekdayTabFragment " + frag.getId() + " mensa " + frag.getArguments().getString(MENSA_ID) );
-
-                ((MensaTab.MenuTabContentFragment) frag).notifyDatasetChanged();
-            }
+                frag.notifyDatasetChanged();
         }
     }
 

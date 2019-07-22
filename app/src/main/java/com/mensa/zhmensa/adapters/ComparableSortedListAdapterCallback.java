@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.adapters;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

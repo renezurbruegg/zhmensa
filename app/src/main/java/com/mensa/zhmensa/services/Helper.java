@@ -16,9 +16,9 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.models.Mensa;
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;

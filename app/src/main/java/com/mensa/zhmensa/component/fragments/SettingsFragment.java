@@ -1,19 +1,16 @@
-package com.mensa.zhmensa.component;
+package com.mensa.zhmensa.component.fragments;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.mensa.zhmensa.MainActivity;
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.SettingsActivity;
+import com.mensa.zhmensa.activities.SettingsActivity;
 import com.mensa.zhmensa.services.LocaleManager;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -61,9 +58,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
                 getActivity().finish();
                 startActivity(getActivity().getIntent());
-                /*Intent i = new Intent(getContext(), MainActivity.class);
-                startActivity(i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK));
-                System.exit(0); */
                 return true;
             }
         });

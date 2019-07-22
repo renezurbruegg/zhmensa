@@ -2,7 +2,6 @@ package com.mensa.zhmensa.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.method.DateTimeKeyListener;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -13,15 +12,15 @@ import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.filters.HiddenMenuFilter;
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.filters.MenuIdFilter;
-import com.mensa.zhmensa.models.EthMensaCategory;
+import com.mensa.zhmensa.models.categories.EthMensaCategory;
 import com.mensa.zhmensa.models.FavoriteMensa;
-import com.mensa.zhmensa.models.FavoriteMenu;
-import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.models.menu.FavoriteMenu;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.models.Mensa;
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 import com.mensa.zhmensa.models.MensaListObservable;
-import com.mensa.zhmensa.models.Menu;
-import com.mensa.zhmensa.models.UzhMensaCategory;
+import com.mensa.zhmensa.models.menu.Menu;
+import com.mensa.zhmensa.models.categories.UzhMensaCategory;
 
 import org.joda.time.DateTime;
 

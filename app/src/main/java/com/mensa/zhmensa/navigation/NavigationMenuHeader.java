@@ -3,7 +3,7 @@ package com.mensa.zhmensa.navigation;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 import com.mensa.zhmensa.services.Helper;
 
 public class NavigationMenuHeader implements  Comparable<NavigationMenuHeader>{

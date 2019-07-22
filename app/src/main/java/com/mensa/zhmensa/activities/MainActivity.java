@@ -1,7 +1,6 @@
-package com.mensa.zhmensa;
+package com.mensa.zhmensa.activities;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,10 +30,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.navigation.NavigationView;
+import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.component.InterceptAllVerticalSwipesViewPager;
-import com.mensa.zhmensa.component.MensaOverviewFragment;
+import com.mensa.zhmensa.component.fragments.MensaOverviewFragment;
 import com.mensa.zhmensa.models.Mensa;
-import com.mensa.zhmensa.models.MensaCategory;
+import com.mensa.zhmensa.models.categories.MensaCategory;
 import com.mensa.zhmensa.navigation.NavigationExpandableListAdapter;
 import com.mensa.zhmensa.navigation.NavigationMenuChild;
 import com.mensa.zhmensa.services.Helper;

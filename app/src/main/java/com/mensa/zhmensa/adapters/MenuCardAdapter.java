@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.component;
+package com.mensa.zhmensa.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,10 +11,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.SortedList;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.component.MenuViewHolder;
 import com.mensa.zhmensa.filters.MenuFilter;
-import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
-import com.mensa.zhmensa.models.IMenu;
-import com.mensa.zhmensa.models.Mensa;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -25,7 +24,7 @@ import java.util.List;
  * Adapter class that holds all menu views for a Mensa.
  * Is used inside the recycler view to display different menus.
  */
-class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
+public class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
 
 
     private Context context;
@@ -33,7 +32,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     private final String mensaId;
     private final MenuFilter filter;
 
-    MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId, MenuFilter menuFilter, Context ctx) {
+    public MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId, MenuFilter menuFilter, Context ctx) {
         this.filter = menuFilter;
 
         this.menus = new SortedList<>(IMenu.class, new ComparableSortedListAdapterCallback(this));
@@ -53,7 +52,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
         this.mensaId = Helper.firstNonNull(mensaId, "unknown Mensa");
     }
 
-    void setItems(@NonNull List<IMenu> items, Context ctx){
+    public void setItems(@NonNull List<IMenu> items, Context ctx){
         this.menus.clear();
 
         for (IMenu item: items) {
@@ -89,7 +88,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     }
 
 
-    SortedList<IMenu> getItems() {
+    public SortedList<IMenu> getItems() {
         return menus;
     }
 }

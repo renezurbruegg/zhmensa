@@ -12,8 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.models.FavoriteMenu;
-import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.models.menu.FavoriteMenu;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -21,11 +21,11 @@ import com.mensa.zhmensa.services.MensaManager;
  * Simple implementation for a Mensa Menu view.
  * This class is used in the MenuCardAdapter that calls the bind function, to load the values of a menu into a card.
  */
-class MenuViewHolder extends RecyclerView.ViewHolder {
+public class MenuViewHolder extends RecyclerView.ViewHolder {
 
     public static final String DUMMY = "dummy";
 
-    MenuViewHolder(@NonNull View itemView) {
+    public MenuViewHolder(@NonNull View itemView) {
         super(itemView);
     }
 
@@ -35,7 +35,7 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
      * @param menu to menu
      * @param mensaId
      */
-    static void bind(MenuViewHolder viewHolder, final IMenu menu, @NonNull final Context ctx, final String mensaId) {
+    public static void bind(MenuViewHolder viewHolder, final IMenu menu, @NonNull final Context ctx, final String mensaId) {
         ((TextView) viewHolder.itemView.findViewById(R.id.card_title)).setText(menu.getName());
         ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setText(menu.getPrices());
         ((TextView) viewHolder.itemView.findViewById(R.id.card_content)).setText(menu.getDescription());

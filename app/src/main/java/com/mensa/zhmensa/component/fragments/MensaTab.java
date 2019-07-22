@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.component;
+package com.mensa.zhmensa.component.fragments;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -19,10 +19,11 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.gson.Gson;
-import com.mensa.zhmensa.MainActivity;
+import com.mensa.zhmensa.activities.MainActivity;
 import com.mensa.zhmensa.R;
-import com.mensa.zhmensa.filters.HiddenMenuFilter;
-import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.adapters.MenuCardAdapter;
+import com.mensa.zhmensa.adapters.TabAdapter;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
@@ -54,7 +55,7 @@ import java.util.List;
  * |--------------------------------------|
  */
 
-class MensaTab {
+public class MensaTab {
 
     
 
@@ -165,7 +166,7 @@ class MensaTab {
                 for (Mensa.MenuCategory category : Mensa.MenuCategory.values()) {
                     String categoryStr = new Gson().toJson(category);
 
-                    Fragment f = MenuTabContentFragment.newInstance(mensaId, weekdayStr, categoryStr);
+                    MenuTabContentFragment f = MenuTabContentFragment.newInstance(mensaId, weekdayStr, categoryStr);
                     adapter.addFragment(f, Helper.getLabelForMealType(category, getContext()));
                 }
             }
@@ -187,25 +188,8 @@ class MensaTab {
             Log.d("onResumeMensaTab", "On Resume called in mensa tab " + getArguments().getString(MENSA_ID));
         }
 
-        void notifyDatasetChanged() {
-            /*
-            if(view != null)
-                ((TextView)view.findViewById(R.id.update_weekday_tab)).setText("Updated " + ++numb);
-            else
-                Log.d("view null", "view was null");
-
-            if (adapter == null) {
-                if (getArguments() == null)
-                    return;
-                // View not created yet
-                Log.e("MensaTab.ndc", "Adapter was null for mensa and day: " + getArguments().getString("mensaId", "null") + " " + getArguments().getString("weekday", "null") + " \n Viewpager: " + (vp == null ? "null" : vp));
-
-                Log.d("MensaWeekdayTab", "added? " + isAdded());
-                return;
-            }
-            Log.d("MensaWeekdayTab", "added? " + isAdded());*/
+        public void notifyDatasetChanged() {
             adapter.notifyDataSetChanged();
-
         }
 
         Mensa.MenuCategory getSelectedMealType() {
@@ -336,7 +320,7 @@ class MensaTab {
             model.getUpdatedMensaId().observe(this, this);
         }
 
-        void notifyDatasetChanged() {
+        public void notifyDatasetChanged() {
             if (menuList != null) {
                 Log.d("MenTabContentFrag", "notifyDatasetChanged() going to rebuild set. Mensa:" + mensaId + " day: " + weekday);
                 menuList.clear();

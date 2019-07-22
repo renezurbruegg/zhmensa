@@ -1,10 +1,12 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.categories;
 
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.Mensa;
+import com.mensa.zhmensa.models.MensaListObservable;
 import com.mensa.zhmensa.services.Helper;
 
 import java.util.ArrayList;

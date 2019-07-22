@@ -1,10 +1,8 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.menu;
 
 import android.content.Context;
 
 import androidx.annotation.Nullable;
-
-import com.mensa.zhmensa.services.MensaManager;
 
 /**
  * Implementation for a menu in the favorite tab.
@@ -37,7 +35,7 @@ public class FavoriteMenu extends Menu {
     }
 
     @Override
-    void setAllergene(@Nullable String allergene) {
+    public void setAllergene(@Nullable String allergene) {
         if(menu instanceof Menu)
             ((Menu)menu).setAllergene(allergene);
     }

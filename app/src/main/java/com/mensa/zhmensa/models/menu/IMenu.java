@@ -1,4 +1,4 @@
-package com.mensa.zhmensa.models;
+package com.mensa.zhmensa.models.menu;
 
 import android.content.Context;
 

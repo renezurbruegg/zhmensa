@@ -5,6 +5,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.mensa.zhmensa.R;
+import com.mensa.zhmensa.models.categories.MensaCategory;
+import com.mensa.zhmensa.models.menu.FavoriteMenu;
+import com.mensa.zhmensa.models.menu.IMenu;
 import com.mensa.zhmensa.services.Helper;
 
 import java.util.Collections;
