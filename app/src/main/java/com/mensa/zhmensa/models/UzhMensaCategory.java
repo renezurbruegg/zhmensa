@@ -69,7 +69,7 @@ public class UzhMensaCategory extends MensaCategory {
 
     @NonNull
     @Override
-    public List<MensaListObservable> loadMensasFromAPI() {
+    public List<MensaListObservable> loadMensasFromAPI(String languageCode) {
         List<MensaListObservable> obsList = new ArrayList<>();
         for(Mensa.Weekday day: Mensa.Weekday.values()) {
 
@@ -79,7 +79,7 @@ public class UzhMensaCategory extends MensaCategory {
                 RequestParams par = new RequestParams();
             //    par.ci
               //  par.put(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
-                final String apiUrl = "https://zfv.ch/" + Helper.getLanguageCode() + "/menus/rssMenuPlan?type=uzh2&menuId=" + route.id + "&dayOfWeek=" + (day.day + 1);
+                final String apiUrl = "https://zfv.ch/" + languageCode+ "/menus/rssMenuPlan?type=uzh2&menuId=" + route.id + "&dayOfWeek=" + (day.day + 1);
                 Log.d("UZHCategory loadMFAPI", "Loading UZH Mensas. Calling url: " + apiUrl);
                 HttpUtils.getByUrl(apiUrl, par, new XMLResponseHandler(obs, route));
             }

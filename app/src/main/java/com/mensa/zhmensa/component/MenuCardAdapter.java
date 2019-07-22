@@ -14,6 +14,7 @@ import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.filters.MenuFilter;
 import com.mensa.zhmensa.models.ComparableSortedListAdapterCallback;
 import com.mensa.zhmensa.models.IMenu;
+import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
@@ -32,7 +33,7 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
     private final String mensaId;
     private final MenuFilter filter;
 
-    MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId, MenuFilter menuFilter) {
+    MenuCardAdapter(@Nullable List<IMenu> menus, String mensaId, MenuFilter menuFilter, Context ctx) {
         this.filter = menuFilter;
 
         this.menus = new SortedList<>(IMenu.class, new ComparableSortedListAdapterCallback(this));
@@ -46,17 +47,23 @@ class MenuCardAdapter extends RecyclerView.Adapter<MenuViewHolder> {
         }
 
         if (this.menus.size() == 0) {
-            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId, MensaManager.activityContext));
+            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId, ctx));
         }
 
         this.mensaId = Helper.firstNonNull(mensaId, "unknown Mensa");
     }
 
-    void setItems(@NonNull List<IMenu> items){
+    void setItems(@NonNull List<IMenu> items, Context ctx){
         this.menus.clear();
+
         for (IMenu item: items) {
             if(filter == null || filter.apply(item))
                 this.menus.add(item);
+        }
+
+        if(this.menus.size() == 0){
+            this.menus.addAll(MensaManager.getPlaceholderForEmptyMenu(mensaId, ctx));
+            return;
         }
         //this.menus.addAll(items);
     }

@@ -34,7 +34,7 @@ public class UzhMenu extends Menu {
     @Override
     public String getAllergene(Context ctx) {
         StringBuilder sb = new StringBuilder();
-        sb.append(MensaManager.activityContext.getString(R.string.nutrition_facts)).append("\n");
+        sb.append(ctx.getString(R.string.nutrition_facts)).append("\n");
 
         for(NutritionInfo i : facts)
             sb.append(i.getHumanReadableInformation()).append("\n");

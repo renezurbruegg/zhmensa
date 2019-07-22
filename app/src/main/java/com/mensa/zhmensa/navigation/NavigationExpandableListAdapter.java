@@ -39,7 +39,7 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
                                            Map<NavigationMenuHeader, List<NavigationMenuChild>> listChildData*/) {
         this.context = context;
         //listDataHeader= new SortedList<NavigationMenuHeader>(new ComparableSortedListAdapterCallback<NavigationFavoritesHeader>(this));
-        setFavorite();
+        setFavorite(context);
 
        // this.listDataChild = listChildData;
 
@@ -51,9 +51,9 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
 
-    private void setFavorite() {
+    private void setFavorite(Context ctx) {
 
-        NavigationFavoritesHeader fav = new NavigationFavoritesHeader();
+        NavigationFavoritesHeader fav = new NavigationFavoritesHeader(ctx);
         Mensa favMensa = MensaManager.getFavoritesMensa();
         NavigationMenuChild favMensaChild = new NavigationMenuChild(favMensa);
 
@@ -246,11 +246,5 @@ public class NavigationExpandableListAdapter extends BaseExpandableListAdapter {
         return storedMensas.size();
     }
 
-    public void clearCache() {
-        listDataChild.clear();
-        listDataHeader.clear();
-        storedMensas.clear();
-        storedCategories.clear();
-        setFavorite();
-    }
+
 }

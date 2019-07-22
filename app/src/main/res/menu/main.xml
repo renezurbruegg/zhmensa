@@ -2,6 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+
+    <item
+        android:id="@+id/action_filter"
+        android:orderInCategory="80"
+        android:title="@string/action_set_filter"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_filter_list_black_24dp"
+>
+    <menu>
+        <item
+            android:id="@+id/menu_only_vegi"
+            android:checkable="true"
+            android:title="@string/only_show_vegi" />
+    </menu>
+    </item>
     <item
         android:id="@+id/action_share"
         android:orderInCategory="90"
@@ -9,6 +24,7 @@
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_share_black_24dp"
         />
+
 
    <!-- <item
         android:id="@+id/action_reload"

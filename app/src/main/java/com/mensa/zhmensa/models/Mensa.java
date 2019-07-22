@@ -209,32 +209,31 @@ public class Mensa implements Comparable<Mensa> {
     }
 
     public enum Weekday {
-        MONDAY(0),TUESDAY(1),WEDNESDAY(2), THURSDAY(3), FRIDAY(4);
+        MONDAY(0), TUESDAY(1), WEDNESDAY(2), THURSDAY(3), FRIDAY(4);
 
         public final int day;
 
-        Weekday(int day){
+        Weekday(int day) {
             this.day = day;
         }
 
         public static Weekday of(int day) {
 
-           for(Weekday knownDay: Weekday.values())
-           {
-               if(knownDay.day == day)
-                   return knownDay;
-           }
+            for (Weekday knownDay : Weekday.values()) {
+                if (knownDay.day == day)
+                    return knownDay;
+            }
 
-           return values()[0];
+            return values()[0];
         }
 
     }
 
-    public void setLastUpdated(Long lastUpdated) {
+    public void setLastUpdated(long lastUpdated){
         this.lastUpdated = lastUpdated;
     }
 
-    public Long getLastUpdated() {
+    public long getLastUpdated() {
         return lastUpdated;
     }
 

@@ -43,4 +43,8 @@
         <item>"en"</item>
         <item>"de"</item>
     </string-array>
+    <string name="clear_cache">Cache löschen</string>
+    <string name="clear_all">Alle gespeicherten Mensas löschen</string>
+    <string name="action_set_filter">Filtern</string>
+    <string name="only_show_vegi">Nur vegetarische Menus</string>
 </resources>

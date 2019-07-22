@@ -108,11 +108,6 @@ public class MainActivity extends LanguageChangableActivity
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
-    @Override
-    protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        MensaManager.activityContext = base;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,7 +117,7 @@ public class MainActivity extends LanguageChangableActivity
         setContentView(R.layout.activity_main);
 
         // Set up context for MensaManager
-        MensaManager.setActivityContext(getApplicationContext());
+        MensaManager.initManager(getApplicationContext());
 
         updateModel = ViewModelProviders.of(this).get(MensaUpdateModel.class);
 
@@ -142,7 +137,7 @@ public class MainActivity extends LanguageChangableActivity
 
 
         for (MensaCategory category : MensaManager.getMensaCategories()) {
-            MensaManager.loadMensasForCategory(category, true);
+            MensaManager.loadMensasForCategory(category, true, getApplicationContext());
         }
 
 
@@ -156,6 +151,7 @@ public class MainActivity extends LanguageChangableActivity
 
         viewPager.setAdapter(viewPagerAdapter);
 
+       // viewPager.setOffscreenPageLimit(5);
         viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -200,15 +196,20 @@ public class MainActivity extends LanguageChangableActivity
             @Override
             public void onRefresh() {
                 swipeView.setRefreshing(true);
-                Log.d("Swipview", "Got refresh action");
+                Log.d("Swipview", "Got refresh action + adapter: " + viewPagerAdapter == null ? "null" : "nonull");
+
+                final Handler handler = new Handler();
                 if (viewPagerAdapter != null) {
+                    if(viewPagerAdapter.getCount() == 0) {
+                        MensaManager.clearState();
+                    }
                     //MensaManager.clearState();
                     if (selectedMensa != null) {
                         MensaManager.invalidateMensa(getSelectedMensa().getUniqueId());
 
 //                        viewPagerAdapter.notifyFragmentForIdChanged(selectedMensa.getUniqueId());
 
-                        final Observable onLoadedObservable = MensaManager.loadMensasForCategoryFromInternet(selectedMensa.getCategory());
+                        final Observable onLoadedObservable = MensaManager.loadMensasForCategoryFromInternet(selectedMensa.getCategory(), getApplicationContext());
                         //viewPagerAdapter.clearCache();
                         //selectMensa(getSelectedMensa());
 
@@ -219,13 +220,14 @@ public class MainActivity extends LanguageChangableActivity
                                 swipeView.setRefreshing(false);
                                 if (currentDayTextView != null)
                                     currentDayTextView.setText(String.format(getString(R.string.week_of), Helper.getHumanReadableDay(0)));
+                                handler.removeCallbacksAndMessages(null);
 
                             }
                         });
                     }
 
                 }
-                (new Handler()).postDelayed(new Runnable() {
+                handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (swipeView.isRefreshing()) {
@@ -235,7 +237,7 @@ public class MainActivity extends LanguageChangableActivity
                             Toast.makeText(getApplicationContext(), R.string.error_download_mensas, Toast.LENGTH_LONG).show();
                         }
                     }
-                }, 5000);
+                }, 10000);
             }
         });
 
@@ -321,6 +323,7 @@ public class MainActivity extends LanguageChangableActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+       //
             MensaManager.clearState();
             super.onBackPressed();
         }
@@ -330,6 +333,7 @@ public class MainActivity extends LanguageChangableActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        menu.findItem(R.id.menu_only_vegi).setChecked(MensaManager.isVegiFilterEnabled(getBaseContext()));
         return true;
     }
 
@@ -380,7 +384,14 @@ public class MainActivity extends LanguageChangableActivity
                 startActivity(Intent.createChooser(i, "Share"));
             }
 
+        } else if(id == R.id.menu_only_vegi) {
+            Log.d("v", "v gclick");
 
+            item.setChecked(!item.isChecked());
+
+            MensaManager.updateMenuFilter(item.isChecked(), getBaseContext());
+
+            //viewPagerAdapter.notifyDataSetChanged();
         }
 
         return super.onOptionsItemSelected(item);
@@ -395,25 +406,18 @@ public class MainActivity extends LanguageChangableActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d("on resume called--1", "on");
-        Log.d("adapter:", viewPagerAdapter == null ? "null" : "notnull");
-        Log.d("otheradapter", expandableListAdapter == null ? "null" : "notnull");
-      /*  Log.d("size", childList.size() + " s");
-        Log.d("size header", headerList.size() + " s");
-        for(Collection val : childList.values()) {
-            Log.d("size", val.size()+ " s");
-        }*/
-        // populateExpandableList();
-        // reloadData(false);
-        // populateExpandableList();
+
+        if(viewPagerAdapter != null && viewPagerAdapter.getCount() == 0)
+            MensaManager.clearState();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
         Log.d("MainActivity.onPause", "Pausing activity. Saving Mensa list to shared preferences");
         // Store mensa to cache
-        MensaManager.storeAllMensasToCache();
+        MensaManager.storeAllMensasToCache(getBaseContext());
+
+        super.onPause();
         // MensaManager.clearState();
 
     }
@@ -541,7 +545,7 @@ public class MainActivity extends LanguageChangableActivity
 
     @Nullable
     private String getMensaIdForPosition(int position) {
-        Log.d("MainActivity", "getMensaIdForPos: pos " + position);
+      //Log.d("MainActivity", "getMensaIdForPos: pos " + position);
 
         if (expandableListAdapter == null) {
             Log.e("MainAct.getMensaidfp", "Expandable list adapter was null");
@@ -554,7 +558,7 @@ public class MainActivity extends LanguageChangableActivity
 
     private int getMensaPosForId(@NonNull String mensaId) {
 
-        Log.d("MainActivity", "getMensaIdForPos: id " + mensaId);
+      //  Log.d("MainActivity", "getMensaIdForPos: id " + mensaId);
 
         if (expandableListAdapter == null) {
             Log.e("MainAct.getMensapfid", "Expandable list adapter was null");
@@ -584,7 +588,7 @@ public class MainActivity extends LanguageChangableActivity
             Log.d("ViewPagerAdapte.getitem", "get item called. pos: " + position);
             if (positionToFragment.get(position) == null) {
 
-                Log.d("ViewPagerAdapte.getitem", "no cached item found going to get new item for id: " + getMensaIdForPosition(position));
+           //     Log.d("ViewPagerAdapte.getitem", "no cached item found going to get new item for id: " + getMensaIdForPosition(position));
                 MensaOverviewFragment frag = MensaOverviewFragment.newInstance(getMensaIdForPosition(position));
                 positionToFragment.put(position, frag);
                 //        Log.d("tagxys", frag.getTag() + "") ;
@@ -616,7 +620,7 @@ public class MainActivity extends LanguageChangableActivity
         @Override
         public int getCount() {
             // mensa count + one favorite mensa
-            Log.d("getcount", "mc " + mensaCount);
+            // Log.d("getcount", "mc " + mensaCount);
             return mensaCount;
         }
 

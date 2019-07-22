@@ -97,27 +97,15 @@ public class EthMensaCategory extends MensaCategory {
             }
             if(typeString.equals("vegetarisch") || typeString.equals("vegetarian")) {
                 newMenu.setVegi(true);
-            } else if( typeString.equals("fish") || typeString.equals("fisch") || typeString.equals("meat") || typeString.equals("fleisch") ) {
+            } else if( typeString.equals("fish") || typeString.equals("fisch") || typeString.equals("meat") || typeString.equals("fleisch")) {
+                newMenu.setVegi(false);
+            } else if(mensa.equals("Dozentenfoyer") && newMenu.getName().equalsIgnoreCase("favorite")) {
                 newMenu.setVegi(false);
             } else {
-
                 newMenu.setVegi(meal.getJSONArray("origins").length() == 0);
-               /* JSONArray originArray = meal.getJSONArray("origins");
-
-                boolean vegi = true;
-                for (int j = 0; j < originArray.length(); j++) {
-                    int id = originArray.getJSONObject(j).getInt("origin_id");
-                    if(id == 25 || id == 50 || id == 39  || id == 8 || id == 24) {
-                        vegi = false;
-                        break;
-                    }
-                }
-                newMenu.setVegi(vegi);*/
             }
 
-            menus.add(
-                    newMenu
-            );
+            menus.add(newMenu);
         }
         return menus;
     }
@@ -150,19 +138,19 @@ public class EthMensaCategory extends MensaCategory {
     }
 
 
-    private String getApiRoute(Mensa.Weekday day, Mensa.MenuCategory mealType) {
+    private String getApiRoute(Mensa.Weekday day, Mensa.MenuCategory mealType, String languageCode) {
         String mealStr = mealType == Mensa.MenuCategory.LUNCH ? "lunch" : "dinner";
 
-        return apiRoute + Helper.getLanguageCode() + "/" + Helper.getDay(day.day) + "/" + mealStr;
+        return apiRoute + languageCode + "/" + Helper.getDay(day.day) + "/" + mealStr;
     }
 
     @NonNull
-    private MensaListObservable getMensaUpdateForDayAndMeal(@NonNull final Mensa.Weekday day, final Mensa.MenuCategory menuCategory) {
+    private MensaListObservable getMensaUpdateForDayAndMeal(@NonNull final Mensa.Weekday day, final Mensa.MenuCategory menuCategory, String languageCode) {
         final MensaListObservable obs = new MensaListObservable(day, menuCategory);
 
         // Log.d("Mensa api request", "Api rquest with menucat " + String.valueOf(menuCategory));
 
-       final String url =  getApiRoute(day, menuCategory);
+       final String url =  getApiRoute(day, menuCategory, languageCode);
 
         Log.d("Mensa api request", "url: " + url);
 
@@ -188,11 +176,11 @@ public class EthMensaCategory extends MensaCategory {
 
     @NonNull
     @Override
-    public List<MensaListObservable> loadMensasFromAPI() {
+    public List<MensaListObservable> loadMensasFromAPI(String languageCode) {
         List<MensaListObservable> list = new ArrayList<>();
         for (Mensa.Weekday day: Mensa.Weekday.values()) {
             for (Mensa.MenuCategory cat: Mensa.MenuCategory.values()) {
-                list.add(getMensaUpdateForDayAndMeal(day, cat));
+                list.add(getMensaUpdateForDayAndMeal(day, cat, languageCode));
             }
         }
         return list;

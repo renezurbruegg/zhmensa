@@ -31,5 +31,9 @@
     <string name="nutrition_facts">Nutrition facts:</string>
     <string name="language">Language</string>
     <string name="closed">closed</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_all">Clear all stored mensas</string>
+    <string name="action_set_filter">Filter</string>
+    <string name="only_show_vegi">Only show vegi</string>
 
 </resources>

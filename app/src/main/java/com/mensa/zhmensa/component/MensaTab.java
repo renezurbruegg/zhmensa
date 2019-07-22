@@ -174,7 +174,7 @@ class MensaTab {
 
             vp.setAdapter(adapter);
 
-
+            vp.setOffscreenPageLimit(0);
             tabLayout.setupWithViewPager(vp);
 
             return view;
@@ -311,7 +311,7 @@ class MensaTab {
             if (menuList.isEmpty())
                 menuList = new ArrayList<>();
 
-            adapter = new MenuCardAdapter(menuList, mensaId, new HiddenMenuFilter());
+            adapter = new MenuCardAdapter(menuList, mensaId, MensaManager.getMenuFilter(getContext()), getContext());
             recyclerView.setAdapter(adapter);
 
             return view;
@@ -359,7 +359,7 @@ class MensaTab {
             }
 
             if (menuList != null && adapter != null) {
-                adapter.setItems(menuList);
+                adapter.setItems(menuList, getContext());
             }
 
             adapter.notifyDataSetChanged();

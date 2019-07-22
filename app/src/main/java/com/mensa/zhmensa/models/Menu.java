@@ -157,7 +157,7 @@ public class Menu implements IMenu{
 
     @NonNull
     private String getAsComparableString() {
-        return id + /*name + */  description;
+        return id + /*name + */  description + isVegi;
     }
 
     @Override

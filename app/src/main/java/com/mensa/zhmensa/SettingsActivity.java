@@ -27,8 +27,6 @@ public class SettingsActivity extends LanguageChangableActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                // todo: goto back activity from here
-                Log.d("sel", "selected");
                 MensaManager.clearState();
                 return super.onOptionsItemSelected(item);
 

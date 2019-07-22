@@ -30,7 +30,7 @@ public class FavoriteMensa extends Mensa {
 
             @NonNull
             @Override
-            public List<MensaListObservable> loadMensasFromAPI() {
+            public List<MensaListObservable> loadMensasFromAPI(String code) {
                 return Collections.emptyList();
             }
         });

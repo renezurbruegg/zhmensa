@@ -23,12 +23,20 @@ import com.mensa.zhmensa.models.Mensa;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
+import org.joda.time.DateTime;
 
-public class MensaOverviewFragment extends Fragment implements Observer<Mensa.Weekday> {
+
+public class MensaOverviewFragment extends Fragment implements Observer<Object> {
+
+    public static final String LAST_UPDATED = "LAST_UPDATED";
 
     private View rootView;
+
+    final int modValue = 1000 * 60 * 60 * 24;
+
     private TabLayout tabLayout;
     private MainActivity.DayUpdatedModel weekdayModel;
+    private MainActivity.MensaUpdateModel mensaModel;
 
     public void setMensaId(String shouldBeId) {
         getArguments().putString(MENSA_ARGUMENT, shouldBeId);
@@ -53,16 +61,18 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
     }
 
     @Override
-    public void onChanged(Mensa.Weekday weekday) {
-        Log.d("MensaOv.onCh", "notify day changed for " + (mensa == null ? "null" : mensa.getUniqueId()) + " to " + weekday);
-        if (viewpager != null && viewpager.getCurrentItem() != weekday.day) {
-            viewpager.setCurrentItem(weekday.day);
-        }
+    public void onChanged(Object obj){
+            if(obj instanceof  Mensa.Weekday)
+                onChangeDay((Mensa.Weekday) obj);
+            else
+                onChangeMensa((String) obj);
     }
 
 
     @Nullable
     private Mensa mensa;
+
+    private long lastUpdated;
 
     @Nullable
     private WeekdayFragmentAdapter mAdapter;
@@ -73,12 +83,52 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
     @SuppressWarnings("HardCodedStringLiteral")
     private static final String MENSA_ARGUMENT = "mensa";
 
+    public long getLastUpdated() {
+        if (getArguments() == null)
+            return 0;
+        return getArguments().getLong(LAST_UPDATED, 0);
+    }
+
     @NonNull
     public String getMensaId() {
         if (getArguments() == null)
             return "null";
 
         return getArguments().getString(MENSA_ARGUMENT, "");
+    }
+
+    private void onChangeDay(Mensa.Weekday weekday) {
+        Log.d("MensaOv.onCh", "notify day changed for " + (mensa == null ? "null" : mensa.getUniqueId()) + " to " + weekday);
+        if (viewpager != null && viewpager.getCurrentItem() != weekday.day) {
+            viewpager.setCurrentItem(weekday.day);
+        }
+    }
+
+    private void onChangeMensa(String mensaName) {
+
+        if(mensaName.equals(getMensaId())) {
+            Mensa m = MensaManager.getMensaForId(mensaName);
+            if(m != null && (m.getLastUpdated() % modValue) != (getLastUpdated() % modValue)) {
+
+                if(mAdapter != null) {
+                    mAdapter.refreshUpdateTime(m.getLastUpdated());
+                    if(tabLayout != null) {
+                        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                            TabLayout.Tab tab = tabLayout.getTabAt(i);
+                            if(tab != null){
+                                View v =tab.getCustomView();
+                                if(v != null){
+                                    TextView tv =  v.findViewById(R.id.tab_weekday_number);
+                                    if(tv != null)
+                                        tv.setText(Helper.getDayForPatternAndStart(mAdapter.getUpdatedDateTime().plusDays(i), "dd.MM"));
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
     }
 
 
@@ -102,10 +152,20 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
         if (mensaId == null)
             return null;
 
+        Mensa m = MensaManager.getMensaForId(mensaId);
+
         Bundle bdl = new Bundle();
+
         MensaOverviewFragment frag = new MensaOverviewFragment();
+
         bdl.putString(MENSA_ARGUMENT, mensaId);
+
+        if(m != null) {
+            bdl.putLong(LAST_UPDATED, m.getLastUpdated());
+        }
+
         frag.setArguments(bdl);
+
         return frag;
     }
 
@@ -145,8 +205,9 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
                     tab.select();
                 }
             }
-        }
 
+           // tabLayout.setupWithViewPager(viewpager);
+        }
 
     }
 
@@ -157,13 +218,22 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
         if (weekdayModel != null)
             weekdayModel.getChangedDay(getMensaId()).removeObserver(this);
 
+        if(mensaModel != null)
+            mensaModel.getUpdatedMensaId().removeObserver(this);
+
     }
+
 
     public void onStart() {
         super.onStart();
+
         Log.d("MensaOVERfrag.onSTart", "onstart for " + getMensaId());
         weekdayModel = ViewModelProviders.of(getActivity()).get(MainActivity.DayUpdatedModel.class);
         weekdayModel.getChangedDay(getMensaId()).observe(this, this);
+
+
+        mensaModel = ViewModelProviders.of(getActivity()).get(MainActivity.MensaUpdateModel.class);
+        mensaModel.getUpdatedMensaId().observe(this, this);
     }
 
     @Nullable
@@ -198,6 +268,8 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
 
         viewpager.setCurrentItem(MensaManager.SELECTED_DAY);
 
+        viewpager.setOffscreenPageLimit(0);
+
         viewpager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
@@ -221,10 +293,17 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
     public class WeekdayFragmentAdapter extends FragmentStatePagerAdapter {
 
         private String mensaId;
-
+        private DateTime updatedTime = null;
         WeekdayFragmentAdapter(@NonNull FragmentManager fm, String mensaId) {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             this.mensaId = mensaId;
+        }
+
+        Mensa getMensa() {
+            if(mensa != null)
+                return mensa;
+            mensa = MensaManager.getMensaForId(mensaId);
+            return  mensa;
         }
 
         @NonNull
@@ -233,14 +312,39 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
             return MensaTab.MensaWeekdayTabFragment.getInstance(mensaId, Mensa.Weekday.of(position));
         }
 
+        void refreshUpdateTime(long newUpdateTime) {
 
-        public View getTabView(int position, LayoutInflater inflater) {
+            final DateTime lastUpTime = new DateTime(newUpdateTime);
+
+            if(lastUpTime.getDayOfWeek() > 5)
+                updatedTime = lastUpTime.plusWeeks(1).withDayOfWeek(1);
+            else
+                updatedTime = lastUpTime.withDayOfWeek(1);
+
+        }
+
+
+        private DateTime getUpdatedDateTime() {
+            if(updatedTime == null) {
+                Mensa m = MensaManager.getMensaForId(mensaId);
+                refreshUpdateTime(m == null ? System.currentTimeMillis() : m.getLastUpdated());
+            }
+
+            return updatedTime;
+
+        }
+
+        View getTabView(int position, LayoutInflater inflater) {
             View view = inflater.inflate(R.layout.custom_weekday_tab, null);
 
             // View Binding
             ((TextView) view.findViewById(R.id.tab_weekday_name)).setText(getPageTitle(position));
-            String weekday = Helper.getDayForPattern(position, "dd.MM");
-            ((TextView) view.findViewById(R.id.tab_weekday_number)).setText(weekday);
+            DateTime date = getUpdatedDateTime();
+
+            String weekday = Helper.getDayForPatternAndStart(date.plusDays(position), "dd.MM");
+
+             ((TextView) view.findViewById(R.id.tab_weekday_number)).setText(weekday);
+
 
 
 

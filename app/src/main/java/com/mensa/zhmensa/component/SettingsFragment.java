@@ -44,6 +44,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             }
         });
 
+        findPreference(getString(R.string.myClearCacheButton)).setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                MensaManager.clearCache(getContext());
+                return true;
+            }
+        });
+
         findPreference("language_preference").setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
             @Override
             public boolean onPreferenceChange(Preference preference, Object newValue) {

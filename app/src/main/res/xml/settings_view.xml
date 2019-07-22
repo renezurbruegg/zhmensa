@@ -6,6 +6,10 @@
         android:key="@string/myDummyButton"
         android:summary="@string/show_hidden_menus"/>
 
+    <Preference android:title="@string/clear_cache"
+        android:key="@string/myClearCacheButton"
+        android:summary="@string/clear_all"/>
+
     <ListPreference
         android:key="language_preference"
         android:title="@string/language"

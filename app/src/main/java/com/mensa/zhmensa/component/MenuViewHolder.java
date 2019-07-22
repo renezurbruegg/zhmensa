@@ -49,6 +49,7 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         final ImageButton showMoreBtn = viewHolder.itemView.findViewById(R.id.showmore_button);
         final ImageButton hideMenuBtn = viewHolder.itemView.findViewById(R.id.hide_button);
         final TextView vegiView =  viewHolder.itemView.findViewById(R.id.vegi_badge);
+
         vegiView.setVisibility(menu.isVegi() ? View.VISIBLE : View.INVISIBLE);
 
         if(Helper.firstNonNull(menu.getMeta(),"").equals(DUMMY)) {
@@ -78,7 +79,7 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         favBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MensaManager.toggleMenuFav(menu);
+                MensaManager.toggleMenuFav(menu, ctx);
                 //menu.setFavorite(!menu.isFavorite());
                 favBtn.setImageResource( menu.isFavorite() ? R.drawable.ic_favorite_black_24dp : R.drawable.ic_favorite_border_black_24dp);
             }
@@ -88,12 +89,12 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         hideMenuBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MensaManager.hideMenu(menu, mensaId);
+                MensaManager.hideMenu(menu, mensaId, ctx);
                 Snackbar.make(view, String.format(ctx.getString(R.string.menu_deleted) , menu.getName()), Snackbar.LENGTH_LONG)
                         .setAction(ctx.getString(R.string.undo), new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                MensaManager.showMenu(menu, mensaId);
+                                MensaManager.showMenu(menu, mensaId, ctx);
                             }
                         })
                         .show();

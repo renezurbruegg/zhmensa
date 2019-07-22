@@ -52,7 +52,7 @@ public abstract class MensaCategory {
     }
 
     @NonNull
-    public abstract List<MensaListObservable> loadMensasFromAPI();
+    public abstract List<MensaListObservable> loadMensasFromAPI(String languageCode);
 
     public boolean containsMensa(@Nullable Mensa mensa) {
         if(mensa == null)

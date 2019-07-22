@@ -120,7 +120,9 @@ public class Helper {
         return getDay(getStartOfWeek().plusDays(selectedDay), DateTimeFormat.forPattern(pattern));
     }
 
-
+    public static String getDayForPatternAndStart(DateTime start, String pattern) {
+        return getDay(start, DateTimeFormat.forPattern(pattern));
+    }
 
 
     static String convertMensaToJsonString(Mensa mensa) {
@@ -214,9 +216,9 @@ public class Helper {
 
     @SuppressWarnings("SameReturnValue")
     @NonNull
-    public static String getLanguageCode() {
-        if(MensaManager.activityContext != null)
-            return PreferenceManager.getDefaultSharedPreferences(MensaManager.activityContext).getString("language_preference", Locale.getDefault().getLanguage());
+    public static String getLanguageCode(Context ctx) {
+        if(ctx!= null)
+            return PreferenceManager.getDefaultSharedPreferences(ctx).getString("language_preference", Locale.getDefault().getLanguage());
         else
             return Locale.getDefault().getLanguage();
     }
