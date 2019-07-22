@@ -22,6 +22,8 @@ public interface IMenu extends Comparable<IMenu> {
     @NonNull
     String getId();
 
+    boolean isVegi();
+
     @Nullable
     String getAllergene(Context ctx);
 

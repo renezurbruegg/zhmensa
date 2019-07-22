@@ -20,6 +20,11 @@ public class FavoriteMenu extends Menu {
         this.mensaName = mensaName;
     }
 
+    @Override
+    public boolean isVegi() {
+        return menu.isVegi();
+    }
+
     @Nullable
     @Override
     public String getAllergene(Context ctx) {

@@ -241,6 +241,9 @@ public class UzhMensaCategory extends MensaCategory {
                     case "h3":
                         // Found Begin of menu
                         currentMenu = new UzhMenu(null, null, null, null, null);
+
+                        currentMenu.setVegi(false);
+
                         menuList.add(currentMenu);
 
                         // found new Meal
@@ -285,6 +288,11 @@ public class UzhMensaCategory extends MensaCategory {
                         }
                         Log.d("i", "i");
                         // FOUND TABLE WITH CALORIES
+                        break;
+                    case "img":
+                        if(currentMenu == null)
+                            continue;
+                        currentMenu.setVegi(true);
                         break;
                 }
 

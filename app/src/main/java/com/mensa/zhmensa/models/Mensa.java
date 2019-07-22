@@ -26,6 +26,9 @@ import static com.mensa.zhmensa.services.Helper.firstNonNull;
  */
 public class Mensa implements Comparable<Mensa> {
 
+
+    private long lastUpdated;
+
     private boolean loadedFromCache = false;
 
     @Nullable
@@ -225,6 +228,14 @@ public class Mensa implements Comparable<Mensa> {
            return values()[0];
         }
 
+    }
+
+    public void setLastUpdated(Long lastUpdated) {
+        this.lastUpdated = lastUpdated;
+    }
+
+    public Long getLastUpdated() {
+        return lastUpdated;
     }
 
     @NonNull

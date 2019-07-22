@@ -35,7 +35,7 @@ public class Helper {
     private static Gson gson;
 
     @SuppressWarnings("HardCodedStringLiteral")
-    private static final String[] UNIQUE_MENU_MENSA = {"Tannebar"};
+    private static final String[] UNIQUE_MENU_MENSA = {"Tannenbar"};
     @SafeVarargs
     @NonNull
     public static <T> T firstNonNull(T... objects){
@@ -144,6 +144,7 @@ public class Helper {
     }
 
 
+    @SuppressWarnings("HardCodedStringLiteral")
     public static String getNameForDay(Mensa.Weekday day, Context ctx) {
         if(ctx != null) {
             switch (day) {
@@ -220,6 +221,10 @@ public class Helper {
             return Locale.getDefault().getLanguage();
     }
 
+    // TODO
+    public static Boolean isMenuVegi(String name, String description) {
+        return false;
+    }
 
 
     @SuppressWarnings("HardCodedStringLiteral")

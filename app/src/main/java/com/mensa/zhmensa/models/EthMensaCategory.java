@@ -64,16 +64,17 @@ public class EthMensaCategory extends MensaCategory {
             String staffPrice = prices.getString("staff");
             String externPrice = prices.getString("extern");
 
-            String pricesStr = "";
+            String typeString = meal.getString("type").toLowerCase();
+            StringBuilder pricesStr = new StringBuilder();
 
             if(!studentPrice.equals("0.00") && !studentPrice.equals("null"))
-                pricesStr += studentPrice;
+                pricesStr.append(studentPrice);
 
             if(!staffPrice.equals("0.00") && !staffPrice.equals("null"))
-                pricesStr += ( pricesStr.isEmpty() ? "" : " / ") + staffPrice;
+                pricesStr.append(( pricesStr.length() == 0 ? "" : " / ") + staffPrice);
 
             if(!externPrice.equals("0.00") && !externPrice.equals("null"))
-                pricesStr += ( externPrice.isEmpty() ? "" : " / ") + externPrice;
+                pricesStr.append(( pricesStr.length() == 0 ? "" : " / ") + externPrice);
 
             JSONArray allergene = meal.getJSONArray("allergens");
             StringBuilder allergeneStr = new StringBuilder();
@@ -84,13 +85,38 @@ public class EthMensaCategory extends MensaCategory {
                     allergeneStr.append(", ");
             }
 
+            Menu newMenu = new Menu(Helper.getIdForMenu(mensa, meal.getString("label"), i, mealType),
+                    meal.getString("label"),
+                    Helper.removeHtmlTags(descriptionStr.toString()),
+                    pricesStr.toString(),
+                    allergeneStr.toString()
+            );
+
+            if(newMenu.getName().contains("grill")){
+                Log.d("got", "it");
+            }
+            if(typeString.equals("vegetarisch") || typeString.equals("vegetarian")) {
+                newMenu.setVegi(true);
+            } else if( typeString.equals("fish") || typeString.equals("fisch") || typeString.equals("meat") || typeString.equals("fleisch") ) {
+                newMenu.setVegi(false);
+            } else {
+
+                newMenu.setVegi(meal.getJSONArray("origins").length() == 0);
+               /* JSONArray originArray = meal.getJSONArray("origins");
+
+                boolean vegi = true;
+                for (int j = 0; j < originArray.length(); j++) {
+                    int id = originArray.getJSONObject(j).getInt("origin_id");
+                    if(id == 25 || id == 50 || id == 39  || id == 8 || id == 24) {
+                        vegi = false;
+                        break;
+                    }
+                }
+                newMenu.setVegi(vegi);*/
+            }
+
             menus.add(
-                    new Menu(Helper.getIdForMenu(mensa, meal.getString("label"), i, mealType),
-                            meal.getString("label"),
-                            Helper.removeHtmlTags(descriptionStr.toString()),
-                            pricesStr,
-                            allergeneStr.toString()
-                    )
+                    newMenu
             );
         }
         return menus;

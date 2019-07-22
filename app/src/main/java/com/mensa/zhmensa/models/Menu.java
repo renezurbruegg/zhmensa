@@ -28,6 +28,7 @@ public class Menu implements IMenu{
     @NonNull
     private String id;
 
+    private Boolean isVegi;
 
 
     public Menu(@Nullable String id,@Nullable String name,@Nullable String description,@Nullable String prices, @Nullable String allergene,@Nullable String meta) {
@@ -77,6 +78,19 @@ public class Menu implements IMenu{
     @NonNull
     public String getId() {
         return id;
+    }
+
+
+    public void setVegi(boolean vegi) {
+        this.isVegi = vegi;
+    }
+
+    @Override
+    public boolean isVegi() {
+        if(isVegi == null) {
+            isVegi = Helper.isMenuVegi(name, description);
+        }
+        return isVegi;
     }
 
     void setPrices(@Nullable String prices) {

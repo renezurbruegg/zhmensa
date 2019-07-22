@@ -9,16 +9,12 @@ import com.mensa.zhmensa.R;
 import com.mensa.zhmensa.services.Helper;
 import com.mensa.zhmensa.services.MensaManager;
 
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class UzhMenu extends Menu {
 
     private final Set<NutritionInfo> facts = new LinkedHashSet<>();
-    public UzhMenu(@Nullable String id, @Nullable String name, @Nullable String description, @Nullable String prices, @Nullable String allergene, @Nullable String meta) {
-        super(id, name, description, prices, allergene, meta);
-    }
 
     public UzhMenu(String id, String name, String description, String prices, String allergene) {
         super(id, name, description, prices, allergene);

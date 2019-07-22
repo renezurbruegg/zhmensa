@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,6 +27,7 @@ import com.mensa.zhmensa.services.MensaManager;
 public class MensaOverviewFragment extends Fragment implements Observer<Mensa.Weekday> {
 
     private View rootView;
+    private TabLayout tabLayout;
     private MainActivity.DayUpdatedModel weekdayModel;
 
     public void setMensaId(String shouldBeId) {
@@ -133,6 +135,19 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
         mAdapter = new WeekdayFragmentAdapter(getChildFragmentManager(), mensaId);
 
         viewpager.setAdapter(mAdapter);
+
+        LayoutInflater inflator = LayoutInflater.from(getContext());
+        if(tabLayout != null) {
+            for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+                if(tab != null){
+                    tab.setCustomView(mAdapter.getTabView(i, inflator));
+                    tab.select();
+                }
+            }
+        }
+
+
     }
 
 
@@ -175,9 +190,11 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
         }
 
         viewpager = rootView.findViewById(R.id.main_viewpager_week);
-        TabLayout tabLayout = rootView.findViewById(R.id.main_tablayout);
+        tabLayout = rootView.findViewById(R.id.main_tablayout);
         tabLayout.setupWithViewPager(viewpager);
         setUpAdapters(mensaId);
+
+
 
         viewpager.setCurrentItem(MensaManager.SELECTED_DAY);
 
@@ -215,6 +232,28 @@ public class MensaOverviewFragment extends Fragment implements Observer<Mensa.We
         public Fragment getItem(int position) {
             return MensaTab.MensaWeekdayTabFragment.getInstance(mensaId, Mensa.Weekday.of(position));
         }
+
+
+        public View getTabView(int position, LayoutInflater inflater) {
+            View view = inflater.inflate(R.layout.custom_weekday_tab, null);
+
+            // View Binding
+            ((TextView) view.findViewById(R.id.tab_weekday_name)).setText(getPageTitle(position));
+            String weekday = Helper.getDayForPattern(position, "dd.MM");
+            ((TextView) view.findViewById(R.id.tab_weekday_number)).setText(weekday);
+
+
+
+            /*
+            TabItem item = mTabItems.get(position);
+
+            // Data Binding
+            thumb.setImageResource(item.icon);
+            title.setText(item.title);
+            subtitle.setText(item.subtitle); */
+
+            return view;
+        };
 
         @Nullable
         @Override

@@ -48,7 +48,8 @@ class MenuViewHolder extends RecyclerView.ViewHolder {
         final LinearLayout showMoreLayout = viewHolder.itemView.findViewById(R.id.showmore_layout);
         final ImageButton showMoreBtn = viewHolder.itemView.findViewById(R.id.showmore_button);
         final ImageButton hideMenuBtn = viewHolder.itemView.findViewById(R.id.hide_button);
-
+        final TextView vegiView =  viewHolder.itemView.findViewById(R.id.vegi_badge);
+        vegiView.setVisibility(menu.isVegi() ? View.VISIBLE : View.INVISIBLE);
 
         if(Helper.firstNonNull(menu.getMeta(),"").equals(DUMMY)) {
             ((TextView) viewHolder.itemView.findViewById(R.id.price_text)).setGravity(View.TEXT_ALIGNMENT_CENTER);
