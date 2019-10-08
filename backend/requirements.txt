@@ -1,8 +1,0 @@
-Flask
-flask-socketio
-Flask-Cors==3.0.3
-Flask-Security==3.0.0
-git+https://github.com/ansrivas/pylogging.git
-flask-jwt-simple[asymmetric_crypto]
-requests
-feedparser
